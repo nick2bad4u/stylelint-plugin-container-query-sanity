@@ -40,3 +40,9 @@ export default {
  },
 };
 ```
+
+## Next steps
+
+- [Compare recommended, strict, and all configs](./configs/index.md)
+- [Read the plugin overview](./overview.md)
+- [Check the current implementation status](./guides/current-status.md)

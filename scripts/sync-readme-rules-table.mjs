@@ -209,12 +209,12 @@ const getRuleFixIndicator = (ruleModule) =>
  *
  * Mapping:
  *
- * - 🟢 = `containerQuerySanityPluginConfigs["container-query-recommended"]`
+ * - 🟡 = `containerQuerySanityPluginConfigs["container-query-recommended"]`
  * - 🟣 = `containerQuerySanityPluginConfigs["container-query-all"]`
- * - 🛡️ = `containerQuerySanityPluginConfigs["container-query-strict"]`
+ * - 🔴 = `containerQuerySanityPluginConfigs["container-query-strict"]`
  *
  * Rules in `container-query-recommended` are also in `container-query-strict`,
- * so they show all three badges. Strict-only rules show 🛡️ + 🟣. Rules only in
+ * so they show all three badges. Strict-only rules show 🔴 + 🟣. Rules only in
  * `container-query-all` show 🟣.
  *
  * @param {string} ruleName
@@ -224,11 +224,11 @@ const getRuleFixIndicator = (ruleModule) =>
  */
 const getPresetKeyIndicator = (ruleName, ruleModule) => {
     if (ruleModule.docs?.recommended === true) {
-        return "[🟢](./docs/rules/configs/container-query-recommended.md) [🛡️](./docs/rules/configs/container-query-strict.md) [🟣](./docs/rules/configs/container-query-all.md)";
+        return "[🟡](./docs/rules/configs/container-query-recommended.md) [🔴](./docs/rules/configs/container-query-strict.md) [🟣](./docs/rules/configs/container-query-all.md)";
     }
 
     if (strictOnlyRuleNames.has(ruleName)) {
-        return "[🛡️](./docs/rules/configs/container-query-strict.md) [🟣](./docs/rules/configs/container-query-all.md)";
+        return "[🔴](./docs/rules/configs/container-query-strict.md) [🟣](./docs/rules/configs/container-query-all.md)";
     }
 
     return "[🟣](./docs/rules/configs/container-query-all.md)";
@@ -248,9 +248,9 @@ const RULES_SECTION_LEGEND = [
     "",
     "**Preset key legend:**",
     "",
-    '- [🟢](./docs/rules/configs/container-query-recommended.md) — `containerQuerySanityPluginConfigs["container-query-recommended"]`',
+    '- [🟡](./docs/rules/configs/container-query-recommended.md) — `containerQuerySanityPluginConfigs["container-query-recommended"]`',
     '- [🟣](./docs/rules/configs/container-query-all.md) — `containerQuerySanityPluginConfigs["container-query-all"]`',
-    '- [🛡️](./docs/rules/configs/container-query-strict.md) — `containerQuerySanityPluginConfigs["container-query-strict"]`',
+    '- [🔴](./docs/rules/configs/container-query-strict.md) — `containerQuerySanityPluginConfigs["container-query-strict"]`',
 ].join("\n");
 
 /** @param {readonly [string, RuleModule]} entry */

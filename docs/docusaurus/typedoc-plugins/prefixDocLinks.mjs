@@ -22,7 +22,7 @@ import { prefixBareMarkdownFileLinksInMarkdown } from "./prefixDocLinksCore.mjs"
  * Escape MDX-sensitive symbols in TypeDoc blockquote signatures.
  *
  * Docusaurus v3 parses Markdown with MDX semantics, so unescaped type
- * signatures such as `<T>` or `{ foo: bar }` are interpreted as JSX.
+ * signatures such as `&lt;T>` or `{ foo: bar }` are interpreted as JSX.
  *
  * @param {string} markdown
  *

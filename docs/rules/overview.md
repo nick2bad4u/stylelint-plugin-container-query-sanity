@@ -21,3 +21,9 @@ description: Overview of stylelint-plugin-container-query-sanity and its package
 - discourage hardcoded breakpoint literals
 
 The repository keeps the full template infrastructure (sync scripts, docs site, validation flows), but the public rule surface is now dedicated to container-query sanity.
+
+## Next steps
+
+- [Install and configure the plugin](./getting-started.md)
+- [Compare shareable configs](./configs/index.md)
+- [Review current release status](./guides/current-status.md)

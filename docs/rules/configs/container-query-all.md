@@ -1,4 +1,4 @@
-# container-query-all
+# 🟣 container-query-all
 
 Full public rule catalog for `container-query-sanity/*`.
 
@@ -23,3 +23,9 @@ Includes recommended rules plus non-recommended strictness checks.
 | [`require-breakpoint-token-usage`](https://nick2bad4u.github.io/stylelint-plugin-container-query-sanity/docs/rules/require-breakpoint-token-usage) | — | Require container breakpoints to come from tokenized values instead of hardcoded length literals. |
 | [`require-container-type-for-named-containers`](https://nick2bad4u.github.io/stylelint-plugin-container-query-sanity/docs/rules/require-container-type-for-named-containers) | — | Require named containers used by size or scroll-state queries to declare an explicit container-type. |
 | [`require-named-container`](https://nick2bad4u.github.io/stylelint-plugin-container-query-sanity/docs/rules/require-named-container) | — | Require every @container rule to target an explicit, valid container name. |
+
+## Related docs
+
+- [Preset matrix](./index.md)
+- [🟡 Recommended config](./container-query-recommended.md)
+- [🔴 Strict config](./container-query-strict.md)

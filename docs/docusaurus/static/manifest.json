@@ -1,6 +1,6 @@
 {
     "$schema": "https://www.schemastore.org/web-manifest-combined.json",
-    "background_color": "#2E2A33",
+    "background_color": "#17110c",
     "description": "Documentation site for stylelint-plugin-container-query-sanity.",
     "display": "standalone",
     "icons": [
@@ -9,6 +9,12 @@
             "sizes": "any",
             "src": "img/logo.svg",
             "type": "image/svg+xml"
+        },
+        {
+            "purpose": "any",
+            "sizes": "192x192",
+            "src": "img/logo-192x192.png",
+            "type": "image/png"
         },
         {
             "purpose": "any",
@@ -23,5 +29,5 @@
     "scope": ".",
     "short_name": "CQ Sanity Docs",
     "start_url": ".",
-    "theme_color": "#2E2A33"
+    "theme_color": "#2b2118"
 }

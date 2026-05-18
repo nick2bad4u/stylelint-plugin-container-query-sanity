@@ -16,17 +16,17 @@ const liveBadges = [
     {
         alt: "npm license",
         href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/blob/main/LICENSE",
-        src: "https://flat.badgen.net/npm/license/stylelint-plugin-container-query-sanity?color=purple",
+        src: "https://flat.badgen.net/npm/license/stylelint-plugin-container-query-sanity?color=orange",
     },
     {
         alt: "npm total downloads",
         href: "https://www.npmjs.com/package/stylelint-plugin-container-query-sanity",
-        src: "https://flat.badgen.net/npm/dt/stylelint-plugin-container-query-sanity?color=pink",
+        src: "https://flat.badgen.net/npm/dt/stylelint-plugin-container-query-sanity?color=yellow",
     },
     {
         alt: "latest GitHub release",
         href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/releases",
-        src: "https://flat.badgen.net/github/release/Nick2bad4u/stylelint-plugin-container-query-sanity?color=cyan",
+        src: "https://flat.badgen.net/github/release/Nick2bad4u/stylelint-plugin-container-query-sanity?color=orange",
     },
     {
         alt: "GitHub stars",
@@ -42,6 +42,11 @@ const liveBadges = [
         alt: "GitHub open issues",
         href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/issues",
         src: "https://flat.badgen.net/github/open-issues/Nick2bad4u/stylelint-plugin-container-query-sanity?color=red",
+    },
+    {
+        alt: "Codecov coverage",
+        href: "https://codecov.io/gh/Nick2bad4u/stylelint-plugin-container-query-sanity",
+        src: "https://flat.badgen.net/codecov/github/Nick2bad4u/stylelint-plugin-container-query-sanity?color=blue",
     },
 ] as const satisfies readonly LiveBadge[];
 
