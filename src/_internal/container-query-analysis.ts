@@ -4,6 +4,15 @@
  */
 import { isDefined, isFinite as isNumberFinite, setHas } from "ts-extras";
 
+/** Size-related container query feature names recognized by this plugin. */
+export type ContainerQueryFeatureName =
+    | "aspect-ratio"
+    | "block-size"
+    | "height"
+    | "inline-size"
+    | "orientation"
+    | "width";
+
 /** Supported container range features handled by this plugin. */
 export type ContainerSizeFeature = "block-size" | "inline-size" | "width";
 
@@ -51,6 +60,14 @@ const sizeFeatures = new Set<ContainerSizeFeature>([
     "inline-size",
     "width",
 ]);
+const sizeQueryFeatureNames = new Set<ContainerQueryFeatureName>([
+    "aspect-ratio",
+    "block-size",
+    "height",
+    "inline-size",
+    "orientation",
+    "width",
+]);
 
 /** Collect feature constraints from one container-query condition. */
 export function collectFeatureConstraints(
@@ -67,6 +84,61 @@ export function collectFeatureConstraints(
     }
 
     return constraints;
+}
+
+/** Collect size-related feature names from one container-query condition. */
+export function collectSizeQueryFeatureNames(
+    condition: string
+): readonly ContainerQueryFeatureName[] {
+    const featureNames = new Set<ContainerQueryFeatureName>();
+
+    for (const expression of extractParenthesizedExpressions(condition)) {
+        const legacyFeature = parseLegacyFeatureName(expression);
+
+        if (isDefined(legacyFeature)) {
+            featureNames.add(legacyFeature);
+        }
+
+        for (const token of tokenizeExpression(expression)) {
+            const feature = parseSizeQueryFeatureName(token);
+
+            if (isDefined(feature)) {
+                featureNames.add(feature);
+            }
+        }
+    }
+
+    return sortLexicographically([...featureNames]);
+}
+
+/** Return whether the condition contains a function-style query. */
+export function conditionContainsQueryFunction(
+    condition: string,
+    functionName: "scroll-state" | "style"
+): boolean {
+    const normalizedFunctionName = functionName.toLowerCase();
+    const normalizedCondition = condition.toLowerCase();
+
+    for (let index = 0; index < normalizedCondition.length; index += 1) {
+        const nextIndex = index + normalizedFunctionName.length;
+        const matchesFunctionName =
+            normalizedCondition.slice(index, nextIndex) ===
+            normalizedFunctionName;
+
+        if (matchesFunctionName) {
+            const previousCharacter = normalizedCondition[index - 1];
+            const nextCharacter = normalizedCondition[nextIndex];
+
+            if (
+                !isIdentifierCharacterOrHyphen(previousCharacter) &&
+                nextCharacter === "("
+            ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 /** Collect all literal length values from one container-query condition. */
@@ -249,21 +321,34 @@ export function normalizeInterval(
 export function parseContainerQueryParams(
     params: string
 ): ParsedContainerQuery {
-    const firstParenOffset = params.indexOf("(");
+    const trimmedParams = params.trim();
+    const firstParenOffset = trimmedParams.indexOf("(");
 
     if (firstParenOffset === -1) {
-        const trimmed = params.trim();
-
         return {
             condition: "",
-            ...(trimmed === "" ? {} : { containerName: trimmed }),
+            ...(trimmedParams === "" ? {} : { containerName: trimmedParams }),
         };
     }
 
-    const nameCandidate = params.slice(0, firstParenOffset).trim();
+    const prefix = trimmedParams.slice(0, firstParenOffset).trim();
+    const functionalConditionName = getFunctionalConditionName(prefix);
+
+    if (isDefined(functionalConditionName)) {
+        const conditionStartOffset =
+            prefix.length - functionalConditionName.length;
+        const containerName = prefix.slice(0, conditionStartOffset).trim();
+
+        return {
+            condition: trimmedParams.slice(conditionStartOffset).trim(),
+            ...(containerName === "" ? {} : { containerName }),
+        };
+    }
+
+    const nameCandidate = prefix;
 
     return {
-        condition: params.slice(firstParenOffset).trim(),
+        condition: trimmedParams.slice(firstParenOffset).trim(),
         ...(nameCandidate === "" ? {} : { containerName: nameCandidate }),
     };
 }
@@ -342,6 +427,20 @@ function firstToken(value: string): string {
     return token;
 }
 
+function getFunctionalConditionName(prefix: string): string | undefined {
+    const normalizedPrefix = prefix.toLowerCase();
+
+    if (normalizedPrefix.endsWith("scroll-state")) {
+        return prefix.slice(prefix.length - "scroll-state".length);
+    }
+
+    if (normalizedPrefix.endsWith("style")) {
+        return prefix.slice(prefix.length - "style".length);
+    }
+
+    return undefined;
+}
+
 function isDigit(character: string | undefined): boolean {
     return isDefined(character) && character >= "0" && character <= "9";
 }
@@ -354,6 +453,10 @@ function isIdentifierCharacter(character: string): boolean {
         (character >= "A" && character <= "Z") ||
         (character >= "0" && character <= "9")
     );
+}
+
+function isIdentifierCharacterOrHyphen(character: string | undefined): boolean {
+    return isDefined(character) && isIdentifierCharacter(character);
 }
 
 function isIdentifierInitialCharacter(character: string | undefined): boolean {
@@ -693,6 +796,24 @@ function parseLegacyConstraint(
     return undefined;
 }
 
+function parseLegacyFeatureName(
+    expression: string
+): ContainerQueryFeatureName | undefined {
+    const separatorOffset = expression.indexOf(":");
+
+    if (separatorOffset <= 0) {
+        return undefined;
+    }
+
+    const left = expression.slice(0, separatorOffset).trim().toLowerCase();
+
+    if (left.startsWith("min-") || left.startsWith("max-")) {
+        return parseSizeQueryFeatureName(left.slice(4));
+    }
+
+    return parseSizeQueryFeatureName(left);
+}
+
 function parseOperator(token: string): RangeOperator | undefined {
     if (token === "<" || token === "<=" || token === ">" || token === ">=") {
         return token;
@@ -758,6 +879,14 @@ function parseSingleComparison(
     return undefined;
 }
 
+function parseSizeQueryFeatureName(
+    token: string
+): ContainerQueryFeatureName | undefined {
+    const normalized = token.trim().toLowerCase();
+
+    return setHas(sizeQueryFeatureNames, normalized) ? normalized : undefined;
+}
+
 function pickStricterLowerBound(
     current: IntervalBound | undefined,
     candidate: IntervalBound
@@ -802,6 +931,27 @@ function pickStricterUpperBound(
     }
 
     return current.inclusive && !candidate.inclusive ? candidate : current;
+}
+
+function sortLexicographically<Value extends string>(
+    values: readonly Value[]
+): readonly Value[] {
+    const sorted: Value[] = [];
+
+    for (const value of values) {
+        let insertionIndex = sorted.length;
+
+        for (const [index, sortedValue] of sorted.entries()) {
+            if (value.localeCompare(sortedValue) < 0) {
+                insertionIndex = index;
+                break;
+            }
+        }
+
+        sorted.splice(insertionIndex, 0, value);
+    }
+
+    return sorted;
 }
 
 function tokenizeExpression(expression: string): readonly string[] {

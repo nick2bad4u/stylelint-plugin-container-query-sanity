@@ -606,7 +606,7 @@ export function createScenarios({ containerQuerySanityPluginConfigs, plugin }) {
     container: layout / inline-size;
 }
 
-@container layout (var(--cq-layout-md) <= width <= var(--cq-layout-lg)) {
+@container layout (var(--cq-layout-md) <= inline-size <= var(--cq-layout-lg)) {
     .card {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -622,14 +622,14 @@ export function createScenarios({ containerQuerySanityPluginConfigs, plugin }) {
     container: layout / inline-size;
 }
 
-@container layout (width > var(--cq-layout-md)) {
+@container layout (inline-size > var(--cq-layout-md)) {
     .layoutGrid {
         gap: 1rem;
     }
 }
 
-@container layout (width >= var(--cq-layout-lg)) {
-    @container layout (width >= var(--cq-layout-xl)) {
+@container layout (inline-size >= var(--cq-layout-lg)) {
+    @container layout (inline-size >= var(--cq-layout-xl)) {
         .layoutGrid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }

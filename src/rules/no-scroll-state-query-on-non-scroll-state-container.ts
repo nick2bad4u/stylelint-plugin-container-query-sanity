@@ -1,15 +1,16 @@
 /**
  * @packageDocumentation
- * Rule preventing size queries from targeting containers without size containment.
+ * Rule preventing scroll-state queries against containers without scroll-state
+ * containment.
  */
 import type { Root } from "postcss";
 
 import stylelint, { type PostcssResult } from "stylelint";
-import { isDefined, isEmpty, setHas } from "ts-extras";
+import { isDefined, setHas } from "ts-extras";
 
 import { collectContainerTypesByName } from "../_internal/container-declaration-analysis.js";
 import {
-    collectFeatureConstraints,
+    conditionContainsQueryFunction,
     parseContainerQueryParams,
 } from "../_internal/container-query-analysis.js";
 import {
@@ -23,39 +24,43 @@ import {
 
 const { report, validateOptions } = stylelint.utils;
 
-const ruleName = createRuleName("no-size-query-on-non-size-container");
+const ruleName = createRuleName(
+    "no-scroll-state-query-on-non-scroll-state-container"
+);
 
-type NoSizeQueryOnNonSizeContainerSecondaryOptions = Readonly<{
+type NoScrollStateQueryOnNonScrollStateContainerSecondaryOptions = Readonly<{
     ignoreNames?: readonly string[];
     whenTypeUnknown?: "ignore" | "report";
 }>;
 
 const missingTypeDeclarationMessage = (containerName: string): string =>
-    `Container query "${containerName}" uses size features but no static container-type declaration for that name was found in this stylesheet. Declare container-type: inline-size|size (or use container shorthand).`;
+    `Container query "${containerName}" uses scroll-state(), but no static container-type declaration for that name was found in this stylesheet. Declare container-type: scroll-state or include scroll-state in the container shorthand.`;
 
-const nonSizeTypeMessage = (containerName: string): string =>
-    `Container query "${containerName}" uses size features, but this stylesheet only declares non-size container-type values for that name. Use container-type: inline-size|size.`;
+const nonScrollStateTypeMessage = (containerName: string): string =>
+    `Container query "${containerName}" uses scroll-state(), but the matching container is not declared with scroll-state containment. Add container-type: scroll-state or remove the scroll-state query.`;
 
 const unknownTypeMessage = (containerName: string): string =>
-    `Container query "${containerName}" uses size features, but this stylesheet only has dynamic or unrecognized container-type declarations for that name. Use an explicit container-type: inline-size|size.`;
+    `Container query "${containerName}" uses scroll-state(), but this stylesheet only has dynamic or unrecognized container-type declarations for that name. Use an explicit container-type including scroll-state.`;
 
 const messages = stylelint.utils.ruleMessages(ruleName, {
     missingTypeDeclaration: missingTypeDeclarationMessage,
-    nonSizeType: nonSizeTypeMessage,
+    nonScrollStateType: nonScrollStateTypeMessage,
     unknownType: unknownTypeMessage,
 });
 
 const docs = {
     description:
-        "Disallow size-feature @container queries that target names declared without size-capable container-type values.",
+        "Disallow scroll-state() queries that target names not declared with scroll-state containment.",
     recommended: false,
-    url: createRuleDocsUrl("no-size-query-on-non-size-container"),
+    url: createRuleDocsUrl(
+        "no-scroll-state-query-on-non-scroll-state-container"
+    ),
 } as const;
 
 const rule =
     (
         primary: boolean,
-        secondaryOptions: NoSizeQueryOnNonSizeContainerSecondaryOptions = {}
+        secondaryOptions: NoScrollStateQueryOnNonScrollStateContainerSecondaryOptions = {}
     ) =>
     (root: Root, result: PostcssResult) => {
         const validOptions = validateOptions(result, ruleName, {
@@ -68,26 +73,29 @@ const rule =
         }
 
         const ignoredNames = new Set(
-            normalizeIgnoreNames(secondaryOptions.ignoreNames)
+            (secondaryOptions.ignoreNames ?? []).map((name) => name.trim())
         );
-        const whenTypeUnknown = normalizeWhenTypeUnknown(
-            secondaryOptions.whenTypeUnknown
-        );
+        const whenTypeUnknown =
+            secondaryOptions.whenTypeUnknown === "report" ? "report" : "ignore";
         const summaryByName = collectContainerTypesByName(root);
 
         root.walkAtRules("container", (atRule) => {
             const parsed = parseContainerQueryParams(atRule.params);
             const containerName = parsed.containerName;
 
-            if (!isDefined(containerName)) {
+            if (
+                !conditionContainsQueryFunction(
+                    parsed.condition,
+                    "scroll-state"
+                )
+            ) {
                 return;
             }
 
-            if (setHas(ignoredNames, containerName)) {
-                return;
-            }
-
-            if (isEmpty(collectFeatureConstraints(parsed.condition))) {
+            if (
+                !isDefined(containerName) ||
+                setHas(ignoredNames, containerName)
+            ) {
                 return;
             }
 
@@ -119,14 +127,14 @@ const rule =
                 return;
             }
 
-            if (summary.hasInlineSizeContainment) {
+            if (summary.hasScrollState) {
                 return;
             }
 
             report({
                 message: summary.hasUnknown
                     ? messages.unknownType(containerName)
-                    : messages.nonSizeType(containerName),
+                    : messages.nonScrollStateType(containerName),
                 node: atRule,
                 result,
                 ruleName,
@@ -134,35 +142,8 @@ const rule =
         });
     };
 
-function normalizeIgnoreNames(values: unknown): readonly string[] {
-    if (!Array.isArray(values)) {
-        return [];
-    }
-
-    const normalized: string[] = [];
-
-    for (const value of values) {
-        if (typeof value === "string") {
-            const trimmed = value.trim();
-
-            if (trimmed !== "") {
-                normalized.push(trimmed);
-            }
-        }
-    }
-
-    return normalized;
-}
-
-function normalizeWhenTypeUnknown(value: unknown): "ignore" | "report" {
-    return value === "report" ? "report" : "ignore";
-}
-
-/**
- * Prevent size queries from targeting names lacking size-capable container
- * types.
- */
-const noSizeQueryOnNonSizeContainerRule: StylelintPluginRuleContract =
+/** Prevent scroll-state queries against non-scroll-state containers. */
+const noScrollStateQueryOnNonScrollStateContainerRule: StylelintPluginRuleContract =
     createStylelintRule({
         docs,
         messages,
@@ -173,4 +154,4 @@ const noSizeQueryOnNonSizeContainerRule: StylelintPluginRuleContract =
         ruleName,
     });
 
-export default noSizeQueryOnNonSizeContainerRule;
+export default noScrollStateQueryOnNonScrollStateContainerRule;

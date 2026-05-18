@@ -188,10 +188,16 @@ const parseCliArgs = (cliArgs) => {
 };
 
 const strictOnlyRuleNames = new Set([
+    "no-block-axis-query-on-inline-size-container",
+    "no-conflicting-container-name-declarations",
+    "no-degenerate-container-query-conditions",
+    "no-scroll-state-query-on-non-scroll-state-container",
     "no-size-query-on-non-size-container",
     "no-unknown-container-names",
+    "prefer-logical-size-features",
     "prefer-range-syntax",
     "require-breakpoint-token-usage",
+    "require-container-type-for-named-containers",
 ]);
 
 /** @param {RuleModule} ruleModule */

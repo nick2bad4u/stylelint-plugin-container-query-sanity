@@ -63,8 +63,28 @@ const sidebars: SidebarsConfig = {
             },
             items: [
                 {
+                    id: "no-block-axis-query-on-inline-size-container",
+                    label: "no-block-axis-query-on-inline-size-container",
+                    type: "doc",
+                },
+                {
+                    id: "no-conflicting-container-name-declarations",
+                    label: "no-conflicting-container-name-declarations",
+                    type: "doc",
+                },
+                {
+                    id: "no-degenerate-container-query-conditions",
+                    label: "no-degenerate-container-query-conditions",
+                    type: "doc",
+                },
+                {
                     id: "no-invalid-container-query-ranges",
                     label: "no-invalid-container-query-ranges",
+                    type: "doc",
+                },
+                {
+                    id: "no-scroll-state-query-on-non-scroll-state-container",
+                    label: "no-scroll-state-query-on-non-scroll-state-container",
                     type: "doc",
                 },
                 {
@@ -83,6 +103,11 @@ const sidebars: SidebarsConfig = {
                     type: "doc",
                 },
                 {
+                    id: "prefer-logical-size-features",
+                    label: "prefer-logical-size-features",
+                    type: "doc",
+                },
+                {
                     id: "prefer-range-syntax",
                     label: "prefer-range-syntax",
                     type: "doc",
@@ -90,6 +115,11 @@ const sidebars: SidebarsConfig = {
                 {
                     id: "require-breakpoint-token-usage",
                     label: "require-breakpoint-token-usage",
+                    type: "doc",
+                },
+                {
+                    id: "require-container-type-for-named-containers",
+                    label: "require-container-type-for-named-containers",
                     type: "doc",
                 },
                 {
