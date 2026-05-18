@@ -430,7 +430,7 @@
         "ini",
         "diff"
     ],
-    "hostedBaseUrl": "https://nick2bad4u.github.io/stylelint-plugin-docusaurus/",
+    "hostedBaseUrl": "https://nick2bad4u.github.io/stylelint-plugin-container-query-sanity/",
     "includeDocCommentReferences": false,
     "includeVersion": true,
     "inlineTags": [
@@ -527,7 +527,7 @@
         "@sealed",
         "@virtual"
     ],
-    "name": "stylelint-plugin-docusaurus Documentation",
+    "name": "stylelint-plugin-container-query-sanity Documentation",
     "navigation": {
         "compactFolders": false,
         "excludeReferences": false,

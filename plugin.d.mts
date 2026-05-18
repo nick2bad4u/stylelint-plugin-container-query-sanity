@@ -5,7 +5,7 @@
 import type { Plugin } from "stylelint";
 
 /**
- * Default stylelint-plugin-docusaurus plugin pack export shape.
+ * Default stylelint-plugin-container-query-sanity plugin pack export shape.
  */
 declare const plugin: readonly Plugin[];
 

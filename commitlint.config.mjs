@@ -1,5 +1,5 @@
 /**
- * Commitlint configuration for stylelint-plugin-docusaurus.
+ * Commitlint configuration for stylelint-plugin-container-query-sanity.
  *
  * Enforces the repository's hybrid Gitmoji format, e.g.:
  *

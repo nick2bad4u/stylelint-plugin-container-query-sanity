@@ -15,44 +15,37 @@ type LiveBadge = {
 const liveBadges = [
     {
         alt: "npm license",
-        href: "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/blob/main/LICENSE",
-        src: "https://flat.badgen.net/npm/license/stylelint-plugin-docusaurus?color=purple",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/blob/main/LICENSE",
+        src: "https://flat.badgen.net/npm/license/stylelint-plugin-container-query-sanity?color=purple",
     },
     {
         alt: "npm total downloads",
-        href: "https://www.npmjs.com/package/stylelint-plugin-docusaurus",
-        src: "https://flat.badgen.net/npm/dt/stylelint-plugin-docusaurus?color=pink",
+        href: "https://www.npmjs.com/package/stylelint-plugin-container-query-sanity",
+        src: "https://flat.badgen.net/npm/dt/stylelint-plugin-container-query-sanity?color=pink",
     },
     {
         alt: "latest GitHub release",
-        href: "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/releases",
-        src: "https://flat.badgen.net/github/release/Nick2bad4u/stylelint-plugin-docusaurus?color=cyan",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/releases",
+        src: "https://flat.badgen.net/github/release/Nick2bad4u/stylelint-plugin-container-query-sanity?color=cyan",
     },
     {
         alt: "GitHub stars",
-        href: "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/stargazers",
-        src: "https://flat.badgen.net/github/stars/Nick2bad4u/stylelint-plugin-docusaurus?color=yellow",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/stargazers",
+        src: "https://flat.badgen.net/github/stars/Nick2bad4u/stylelint-plugin-container-query-sanity?color=yellow",
     },
     {
         alt: "GitHub forks",
-        href: "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/forks",
-        src: "https://flat.badgen.net/github/forks/Nick2bad4u/stylelint-plugin-docusaurus?color=green",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/forks",
+        src: "https://flat.badgen.net/github/forks/Nick2bad4u/stylelint-plugin-container-query-sanity?color=green",
     },
     {
         alt: "GitHub open issues",
-        href: "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus/issues",
-        src: "https://flat.badgen.net/github/open-issues/Nick2bad4u/stylelint-plugin-docusaurus?color=red",
-    },
-    {
-        alt: "Codecov",
-        href: "https://app.codecov.io/gh/Nick2bad4u/stylelint-plugin-docusaurus",
-        src: "https://flat.badgen.net/codecov/github/Nick2bad4u/stylelint-plugin-docusaurus?color=blue",
+        href: "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity/issues",
+        src: "https://flat.badgen.net/github/open-issues/Nick2bad4u/stylelint-plugin-container-query-sanity?color=red",
     },
 ] as const satisfies readonly LiveBadge[];
 
-/**
- * Renders live repository and package badges for the docs homepage.
- */
+/** Render live project badges on the docs homepage. */
 export default function GitHubStats({ className = "" }: GitHubStatsProps) {
     const badgeListClassName = [styles.liveBadgeList, className]
         .filter(Boolean)

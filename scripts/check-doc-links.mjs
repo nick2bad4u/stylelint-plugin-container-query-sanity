@@ -120,6 +120,7 @@ const IGNORED_DIRECTORIES = new Set([
 // Capture Markdown links like [text](url) and images ![alt](url).
 // NOTE: this intentionally stays lightweight for MDX-heavy docs, so the
 // surrounding helpers strip code spans/blocks and normalize destinations.
+// eslint-disable-next-line sonarjs/slow-regex -- Lightweight markdown link capture for pre-filtered prose content.
 const LINK_PATTERN = /!?\[[^\]]*]\(([^)]+)\)/g;
 const HTML_ANCHOR_HREF_PATTERN =
     /<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s"'=<>`]+))/giu;

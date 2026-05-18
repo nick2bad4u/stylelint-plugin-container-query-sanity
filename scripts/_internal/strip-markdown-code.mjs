@@ -11,21 +11,31 @@
  * @returns {FencedCodeBlockState | undefined}
  */
 function parseOpeningFence(line) {
-    const openingFenceMatch =
-        /^(?: {0,3})(?<fence>`{3,}|~{3,})(?<rest>[^\r\n]*)$/u.exec(line);
+    const lineWithoutIndent = line.startsWith("   ")
+        ? line.slice(3)
+        : line.startsWith("  ")
+          ? line.slice(2)
+          : line.startsWith(" ")
+            ? line.slice(1)
+            : line;
+    const firstCharacter = lineWithoutIndent[0];
 
-    if (openingFenceMatch?.groups === undefined) {
+    if (firstCharacter !== "`" && firstCharacter !== "~") {
         return undefined;
     }
 
-    const fence = openingFenceMatch.groups["fence"];
+    let fenceLength = 0;
 
-    if (fence === undefined) {
+    while (lineWithoutIndent[fenceLength] === firstCharacter) {
+        fenceLength += 1;
+    }
+
+    if (fenceLength < 3) {
         return undefined;
     }
 
-    const rest = openingFenceMatch.groups["rest"] ?? "";
-    const fenceCharacter = /** @type {"`" | "~"} */ (fence[0]);
+    const rest = lineWithoutIndent.slice(fenceLength);
+    const fenceCharacter = /** @type {"`" | "~"} */ (firstCharacter);
 
     if (fenceCharacter === "`" && rest.includes("`")) {
         return undefined;
@@ -33,7 +43,7 @@ function parseOpeningFence(line) {
 
     return {
         fenceCharacter,
-        minimumFenceLength: fence.length,
+        minimumFenceLength: fenceLength,
     };
 }
 
@@ -44,24 +54,27 @@ function parseOpeningFence(line) {
  * @returns {boolean}
  */
 function isClosingFence(line, fencedCodeBlockState) {
-    const closingFenceMatch = /^(?: {0,3})(?<fence>`{3,}|~{3,})[ \t]*$/u.exec(
-        line
-    );
+    const lineWithoutIndent = line.startsWith("   ")
+        ? line.slice(3)
+        : line.startsWith("  ")
+          ? line.slice(2)
+          : line.startsWith(" ")
+            ? line.slice(1)
+            : line;
+    const fenceCharacter = fencedCodeBlockState.fenceCharacter;
+    let fenceLength = 0;
 
-    if (closingFenceMatch?.groups === undefined) {
+    while (lineWithoutIndent[fenceLength] === fenceCharacter) {
+        fenceLength += 1;
+    }
+
+    if (fenceLength < fencedCodeBlockState.minimumFenceLength) {
         return false;
     }
 
-    const fence = closingFenceMatch.groups["fence"];
+    const trailingCharacters = lineWithoutIndent.slice(fenceLength);
 
-    if (fence === undefined) {
-        return false;
-    }
-
-    return (
-        fence.startsWith(fencedCodeBlockState.fenceCharacter) &&
-        fence.length >= fencedCodeBlockState.minimumFenceLength
-    );
+    return trailingCharacters.trim() === "";
 }
 
 /**

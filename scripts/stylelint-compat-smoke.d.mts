@@ -24,12 +24,16 @@ export interface StylelintLike {
 export interface BuiltPluginSurface {
     readonly builtPluginCjs: unknown;
     readonly configNames: readonly string[];
-    readonly docusaurusPluginConfigs: {
-        readonly "docusaurus-all": import("stylelint").Config & {
+    readonly containerQuerySanityPluginConfigs: {
+        readonly "container-query-all": import("stylelint").Config & {
             readonly plugins: (string | import("stylelint").Plugin)[];
             readonly rules: Readonly<Record<string, unknown>>;
         };
-        readonly "docusaurus-recommended": import("stylelint").Config & {
+        readonly "container-query-recommended": import("stylelint").Config & {
+            readonly plugins: (string | import("stylelint").Plugin)[];
+            readonly rules: Readonly<Record<string, unknown>>;
+        };
+        readonly "container-query-strict": import("stylelint").Config & {
             readonly plugins: (string | import("stylelint").Plugin)[];
             readonly rules: Readonly<Record<string, unknown>>;
         };
@@ -80,7 +84,10 @@ export function assertPluginSurface(
 ): void;
 
 export function createScenarios(
-    input: Pick<BuiltPluginSurface, "docusaurusPluginConfigs" | "plugin">
+    input: Pick<
+        BuiltPluginSurface,
+        "containerQuerySanityPluginConfigs" | "plugin"
+    >
 ): readonly ConfigScenario[];
 
 export function runConfigScenario(

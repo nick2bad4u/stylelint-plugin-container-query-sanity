@@ -124,8 +124,11 @@ const detectLineEnding = (markdown) =>
 const normalizeMarkdownLineEndings = (markdown, lineEnding) =>
     markdown.replaceAll(/\r?\n/gv, lineEnding);
 
-/** @param {string} markdown */
-const getReadmeRulesSectionBounds = (markdown) => {
+/**
+ * @param {string} markdown
+ * @param {"\n" | "\r\n"} lineEnding
+ */
+const getReadmeRulesSectionBounds = (markdown, lineEnding) => {
     const startOffset = markdown.indexOf(rulesSectionHeading);
 
     if (startOffset < 0) {
@@ -133,7 +136,7 @@ const getReadmeRulesSectionBounds = (markdown) => {
     }
 
     const nextHeadingOffset = markdown.indexOf(
-        "\n## ",
+        `${lineEnding}## `,
         startOffset + rulesSectionHeading.length
     );
 
@@ -146,11 +149,15 @@ const getReadmeRulesSectionBounds = (markdown) => {
 /**
  * @param {string} markdown
  * @param {string} nextRulesSection
+ * @param {"\n" | "\r\n"} lineEnding
  *
  * @returns {string}
  */
-const replaceReadmeRulesSection = (markdown, nextRulesSection) => {
-    const { endOffset, startOffset } = getReadmeRulesSectionBounds(markdown);
+const replaceReadmeRulesSection = (markdown, nextRulesSection, lineEnding) => {
+    const { endOffset, startOffset } = getReadmeRulesSectionBounds(
+        markdown,
+        lineEnding
+    );
 
     return (
         markdown.slice(0, startOffset) +
@@ -180,6 +187,13 @@ const parseCliArgs = (cliArgs) => {
     return { writeChanges };
 };
 
+const strictOnlyRuleNames = new Set([
+    "no-size-query-on-non-size-container",
+    "no-unknown-container-names",
+    "prefer-range-syntax",
+    "require-breakpoint-token-usage",
+]);
+
 /** @param {RuleModule} ruleModule */
 const getRuleFixIndicator = (ruleModule) =>
     ruleModule.meta?.fixable === true ? "🔧" : "—";
@@ -189,21 +203,30 @@ const getRuleFixIndicator = (ruleModule) =>
  *
  * Mapping:
  *
- * - 🟢 = `docusaurusPluginConfigs["docusaurus-recommended"]`
- * - 🟣 = `docusaurusPluginConfigs["docusaurus-all"]`
- * - 🛡️ = `docusaurusPluginConfigs["docusaurus-docs-safe"]`
+ * - 🟢 = `containerQuerySanityPluginConfigs["container-query-recommended"]`
+ * - 🟣 = `containerQuerySanityPluginConfigs["container-query-all"]`
+ * - 🛡️ = `containerQuerySanityPluginConfigs["container-query-strict"]`
  *
- * Rules in `docusaurus-recommended` are also in `docusaurus-docs-safe`, so they
- * show all three badges. Rules only in `docusaurus-all` show just 🟣.
+ * Rules in `container-query-recommended` are also in `container-query-strict`,
+ * so they show all three badges. Strict-only rules show 🛡️ + 🟣. Rules only in
+ * `container-query-all` show 🟣.
  *
+ * @param {string} ruleName
  * @param {RuleModule} ruleModule
  *
  * @returns {string}
  */
-const getPresetKeyIndicator = (ruleModule) =>
-    ruleModule.docs?.recommended === true
-        ? "[🟢](./docs/rules/configs/docusaurus-recommended.md) [🛡️](./docs/rules/configs/docusaurus-docs-safe.md) [🟣](./docs/rules/configs/docusaurus-all.md)"
-        : "[🟣](./docs/rules/configs/docusaurus-all.md)";
+const getPresetKeyIndicator = (ruleName, ruleModule) => {
+    if (ruleModule.docs?.recommended === true) {
+        return "[🟢](./docs/rules/configs/container-query-recommended.md) [🛡️](./docs/rules/configs/container-query-strict.md) [🟣](./docs/rules/configs/container-query-all.md)";
+    }
+
+    if (strictOnlyRuleNames.has(ruleName)) {
+        return "[🛡️](./docs/rules/configs/container-query-strict.md) [🟣](./docs/rules/configs/container-query-all.md)";
+    }
+
+    return "[🟣](./docs/rules/configs/container-query-all.md)";
+};
 
 /**
  * Legend block prepended to the Rules section.
@@ -219,9 +242,9 @@ const RULES_SECTION_LEGEND = [
     "",
     "**Preset key legend:**",
     "",
-    '- [🟢](./docs/rules/configs/docusaurus-recommended.md) — `docusaurusPluginConfigs["docusaurus-recommended"]`',
-    '- [🟣](./docs/rules/configs/docusaurus-all.md) — `docusaurusPluginConfigs["docusaurus-all"]`',
-    '- [🛡️](./docs/rules/configs/docusaurus-docs-safe.md) — `docusaurusPluginConfigs["docusaurus-docs-safe"]`',
+    '- [🟢](./docs/rules/configs/container-query-recommended.md) — `containerQuerySanityPluginConfigs["container-query-recommended"]`',
+    '- [🟣](./docs/rules/configs/container-query-all.md) — `containerQuerySanityPluginConfigs["container-query-all"]`',
+    '- [🛡️](./docs/rules/configs/container-query-strict.md) — `containerQuerySanityPluginConfigs["container-query-strict"]`',
 ].join("\n");
 
 /** @param {readonly [string, RuleModule]} entry */
@@ -232,7 +255,7 @@ const toRuleTableRow = ([ruleName, ruleModule]) => {
         throw new TypeError(`Rule '${ruleName}' is missing docs metadata.`);
     }
 
-    return `| [\`${ruleName}\`](${docs.url}) | ${getRuleFixIndicator(ruleModule)} | ${getPresetKeyIndicator(ruleModule)} | ${escapeMarkdownTableCell(docs.description)} |`;
+    return `| [\`${ruleName}\`](${docs.url}) | ${getRuleFixIndicator(ruleModule)} | ${getPresetKeyIndicator(ruleName, ruleModule)} | ${escapeMarkdownTableCell(docs.description)} |`;
 };
 
 /** @param {RulesMap} rules */
@@ -245,9 +268,9 @@ export const generateReadmeRulesSectionFromRules = (rules) => {
         return [
             "## Rules",
             "",
-            "The public `docusaurus/*` rule catalog is currently empty on purpose.",
+            "The public `container-query-sanity/*` rule catalog is currently empty on purpose.",
             "",
-            "This repository already ships the runtime, tests, docs, and build scaffolding required for future Docusaurus-specific Stylelint rules.",
+            "This repository already ships the runtime, tests, docs, and build scaffolding required for future Container Query Sanity-specific Stylelint rules.",
             "",
         ].join("\n");
     }
@@ -312,7 +335,8 @@ export const syncReadmeRulesTable = async ({
     );
     const nextReadme = replaceReadmeRulesSection(
         normalizedReadme,
-        nextRulesSection
+        nextRulesSection,
+        lineEnding
     );
 
     if (nextReadme === normalizedReadme) {

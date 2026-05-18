@@ -84,12 +84,12 @@ const toFileHref = (filePath) => {
 
 /**
  * @typedef {Readonly<{
- *     "docusaurus-all": import("stylelint").Config &
+ *     "container-query-all": import("stylelint").Config &
  *         Readonly<{
  *             plugins: StylelintConfigPluginArray;
  *             rules: Readonly<Record<string, unknown>>;
  *         }>;
- *     "docusaurus-recommended": import("stylelint").Config &
+ *     "container-query-recommended": import("stylelint").Config &
  *         Readonly<{
  *             plugins: StylelintConfigPluginArray;
  *             rules: Readonly<Record<string, unknown>>;
@@ -101,7 +101,7 @@ const toFileHref = (filePath) => {
  * @typedef {Readonly<{
  *     builtPluginCjs: unknown;
  *     configNames: readonly string[];
- *     docusaurusPluginConfigs: BuiltPluginConfigs;
+ *     containerQuerySanityPluginConfigs: BuiltPluginConfigs;
  *     meta: Readonly<{
  *         name: string;
  *         namespace: string;
@@ -366,11 +366,13 @@ export function assertStylelintMajor(
 function createSurfaceSnapshot(candidate) {
     const candidateRecord = toRecord(candidate);
     const pluginConfigsRecord = toRecord(
-        candidateRecord["docusaurusPluginConfigs"]
+        candidateRecord["containerQuerySanityPluginConfigs"]
     );
-    const allConfigRecord = toRecord(pluginConfigsRecord["docusaurus-all"]);
+    const allConfigRecord = toRecord(
+        pluginConfigsRecord["container-query-all"]
+    );
     const recommendedConfigRecord = toRecord(
-        pluginConfigsRecord["docusaurus-recommended"]
+        pluginConfigsRecord["container-query-recommended"]
     );
 
     return {
@@ -417,9 +419,10 @@ async function loadBuiltPluginSurface({
             configNames: /** @type {readonly string[]} */ (
                 builtPluginModule["configNames"]
             ),
-            docusaurusPluginConfigs: /** @type {BuiltPluginConfigs} */ (
-                builtPluginModule["docusaurusPluginConfigs"]
-            ),
+            containerQuerySanityPluginConfigs:
+                /** @type {BuiltPluginConfigs} */ (
+                    builtPluginModule["containerQuerySanityPluginConfigs"]
+                ),
             meta: /** @type {BuiltPluginSurface["meta"]} */ (
                 builtPluginModule["meta"]
             ),
@@ -453,7 +456,7 @@ export function assertPluginSurface(surface, { logger = console } = {}) {
     const {
         builtPluginCjs,
         configNames,
-        docusaurusPluginConfigs,
+        containerQuerySanityPluginConfigs,
         meta,
         plugin,
         ruleIds,
@@ -471,9 +474,9 @@ export function assertPluginSurface(surface, { logger = console } = {}) {
         throw new TypeError("Plugin metadata is missing a package name.");
     }
 
-    if (meta.namespace !== "docusaurus") {
+    if (meta.namespace !== "container-query-sanity") {
         throw new TypeError(
-            `Expected plugin namespace 'docusaurus', received '${meta.namespace}'.`
+            `Expected plugin namespace 'container-query-sanity', received '${meta.namespace}'.`
         );
     }
 
@@ -481,9 +484,12 @@ export function assertPluginSurface(surface, { logger = console } = {}) {
         !Array.isArray(configNames) ||
         configNames.length === 0 ||
         !Array.isArray(
-            docusaurusPluginConfigs["docusaurus-recommended"].plugins
+            containerQuerySanityPluginConfigs["container-query-recommended"]
+                .plugins
         ) ||
-        !Array.isArray(docusaurusPluginConfigs["docusaurus-all"].plugins)
+        !Array.isArray(
+            containerQuerySanityPluginConfigs["container-query-all"].plugins
+        )
     ) {
         throw new TypeError("Config names export is unavailable.");
     }
@@ -510,7 +516,7 @@ export function assertPluginSurface(surface, { logger = console } = {}) {
         !isDeepStrictEqual(
             createSurfaceSnapshot({
                 configNames,
-                docusaurusPluginConfigs,
+                containerQuerySanityPluginConfigs,
                 meta,
                 ruleIds,
                 ruleNames,
@@ -564,8 +570,14 @@ export async function runConfigScenario(
     }
 
     if (invalidOptionWarnings.length > 0) {
+        const preview = JSON.stringify(
+            invalidOptionWarnings.slice(0, 3),
+            null,
+            2
+        );
+
         throw new Error(
-            `${name}: encountered invalid option warnings (${invalidOptionWarnings.length}).`
+            `${name}: encountered invalid option warnings (${invalidOptionWarnings.length}). Preview: ${preview}`
         );
     }
 
@@ -579,57 +591,49 @@ export async function runConfigScenario(
 }
 
 /**
- * @param {Pick<BuiltPluginSurface, "docusaurusPluginConfigs" | "plugin">} input
+ * @param {Pick<
+ *     BuiltPluginSurface,
+ *     "containerQuerySanityPluginConfigs" | "plugin"
+ * >} input
  *
  * @returns {readonly ConfigScenario[]}
  */
-export function createScenarios({ docusaurusPluginConfigs, plugin }) {
+export function createScenarios({ containerQuerySanityPluginConfigs, plugin }) {
     const baselineCssModule = `
-.heroBanner {
-    --hero-banner-color: var(--ifm-color-primary);
-    color: var(--hero-banner-color);
+.layout {
+    --cq-layout-lg: 80rem;
+    --cq-layout-md: 40rem;
+    container: layout / inline-size;
+}
+
+@container layout (var(--cq-layout-md) <= width <= var(--cq-layout-lg)) {
+    .card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
 }
 `.trim();
 
     const baselineGlobalCss = `
-:root {
-    --ifm-color-primary: #4e89e8;
-    --ifm-color-primary-dark: #3576d4;
-    --ifm-color-primary-darker: #2c68be;
-    --ifm-color-primary-darkest: #234f92;
-    --ifm-color-primary-light: #6d9ef0;
-    --ifm-color-primary-lighter: #89b1f4;
-    --ifm-color-primary-lightest: #b8d0fa;
+.layout {
+    --cq-layout-xl: 64rem;
+    --cq-layout-lg: 50rem;
+    --cq-layout-md: 40rem;
+    container: layout / inline-size;
 }
 
-html[data-theme='light'] .DocSearch {
-    --docsearch-primary-color: #4f46e5;
+@container layout (width > var(--cq-layout-md)) {
+    .layoutGrid {
+        gap: 1rem;
+    }
 }
 
-html[data-theme='dark'] .DocSearch {
-    --docsearch-primary-color: #818cf8;
-}
-
-[data-theme='dark'] {
-    --ifm-color-primary: #8ab4f8;
-    --ifm-color-primary-dark: #6ea3f5;
-    --ifm-color-primary-darker: #5a97f3;
-    --ifm-color-primary-darkest: #2f7ce9;
-    --ifm-color-primary-light: #a6c5fb;
-    --ifm-color-primary-lighter: #bad1fc;
-    --ifm-color-primary-lightest: #ebf3fe;
-}
-
-.theme-doc-markdown h2 {
-    margin-block-start: 2rem;
-}
-
-.theme-doc-sidebar-menu .menu__link {
-    font-weight: 700;
-}
-
-.heroBanner {
-    color: var(--ifm-color-primary);
+@container layout (width >= var(--cq-layout-lg)) {
+    @container layout (width >= var(--cq-layout-xl)) {
+        .layoutGrid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
 }
 `.trim();
 
@@ -647,12 +651,18 @@ html[data-theme='dark'] .DocSearch {
             code: baselineCssModule,
             codeFilename: "Component.module.css",
             config: {
-                ...docusaurusPluginConfigs["docusaurus-recommended"],
+                ...containerQuerySanityPluginConfigs[
+                    "container-query-recommended"
+                ],
                 plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-recommended"].plugins
+                    containerQuerySanityPluginConfigs[
+                        "container-query-recommended"
+                    ].plugins
                 ),
                 rules: {
-                    ...docusaurusPluginConfigs["docusaurus-recommended"].rules,
+                    ...containerQuerySanityPluginConfigs[
+                        "container-query-recommended"
+                    ].rules,
                 },
             },
             name: "recommended-config-modules",
@@ -661,12 +671,14 @@ html[data-theme='dark'] .DocSearch {
             code: baselineCssModule,
             codeFilename: "Component.module.css",
             config: {
-                ...docusaurusPluginConfigs["docusaurus-all"],
+                ...containerQuerySanityPluginConfigs["container-query-all"],
                 plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-all"].plugins
+                    containerQuerySanityPluginConfigs["container-query-all"]
+                        .plugins
                 ),
                 rules: {
-                    ...docusaurusPluginConfigs["docusaurus-all"].rules,
+                    ...containerQuerySanityPluginConfigs["container-query-all"]
+                        .rules,
                 },
             },
             name: "all-config-modules",
@@ -675,12 +687,18 @@ html[data-theme='dark'] .DocSearch {
             code: baselineGlobalCss,
             codeFilename: "src/css/custom.css",
             config: {
-                ...docusaurusPluginConfigs["docusaurus-recommended"],
+                ...containerQuerySanityPluginConfigs[
+                    "container-query-recommended"
+                ],
                 plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-recommended"].plugins
+                    containerQuerySanityPluginConfigs[
+                        "container-query-recommended"
+                    ].plugins
                 ),
                 rules: {
-                    ...docusaurusPluginConfigs["docusaurus-recommended"].rules,
+                    ...containerQuerySanityPluginConfigs[
+                        "container-query-recommended"
+                    ].rules,
                 },
             },
             name: "recommended-config-global",
@@ -689,12 +707,14 @@ html[data-theme='dark'] .DocSearch {
             code: baselineGlobalCss,
             codeFilename: "src/css/custom.css",
             config: {
-                ...docusaurusPluginConfigs["docusaurus-all"],
+                ...containerQuerySanityPluginConfigs["container-query-all"],
                 plugins: Array.from(
-                    docusaurusPluginConfigs["docusaurus-all"].plugins
+                    containerQuerySanityPluginConfigs["container-query-all"]
+                        .plugins
                 ),
                 rules: {
-                    ...docusaurusPluginConfigs["docusaurus-all"].rules,
+                    ...containerQuerySanityPluginConfigs["container-query-all"]
+                        .rules,
                 },
             },
             name: "all-config-global",
@@ -749,7 +769,8 @@ export async function runStylelintCompatSmoke({
     assertPluginSurface(builtPluginSurface, { logger });
 
     for (const scenario of createScenarios({
-        docusaurusPluginConfigs: builtPluginSurface.docusaurusPluginConfigs,
+        containerQuerySanityPluginConfigs:
+            builtPluginSurface.containerQuerySanityPluginConfigs,
         plugin: builtPluginSurface.plugin,
     })) {
         await runConfigScenario(scenario, {

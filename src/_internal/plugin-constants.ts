@@ -1,37 +1,35 @@
 /**
  * @packageDocumentation
- * Static package and docs constants used throughout the Stylelint plugin runtime.
+ * Static package metadata and helper factories for namespaced rule exports.
  */
+import type { ArrayValues } from "type-fest";
+
 import packageJson from "../../package.json" with { type: "json" };
 
 /** Public npm package name. */
-export const PACKAGE_NAME = "stylelint-plugin-docusaurus";
+export const PACKAGE_NAME = "stylelint-plugin-container-query-sanity";
 /** Public Stylelint rule namespace. */
-export const PLUGIN_NAMESPACE = "docusaurus";
+export const PLUGIN_NAMESPACE = "container-query-sanity";
 /** Public GitHub repository URL. */
 export const REPOSITORY_URL =
-    "https://github.com/Nick2bad4u/stylelint-plugin-docusaurus";
+    "https://github.com/Nick2bad4u/stylelint-plugin-container-query-sanity";
 /** Public documentation site URL. */
 export const DOCS_SITE_URL =
-    "https://nick2bad4u.github.io/stylelint-plugin-docusaurus";
+    "https://nick2bad4u.github.io/stylelint-plugin-container-query-sanity";
 /** Base URL for authored rule documentation. */
 export const DOCS_RULES_BASE_URL: `${string}/docs/rules` = `${DOCS_SITE_URL}/docs/rules`;
-/** Supported shareable config names exported by this template. */
+/** Supported shareable config names exported by this package. */
 export const CONFIG_NAMES = [
-    "docusaurus-recommended",
-    "docusaurus-all",
-    "docusaurus-docs-safe",
+    "container-query-all",
+    "container-query-recommended",
+    "container-query-strict",
 ] as const;
 
 /** Shareable config names exported by the plugin runtime. */
-export type DocusaurusConfigName = (typeof CONFIG_NAMES)[number];
+export type ContainerQueryConfigName = ArrayValues<typeof CONFIG_NAMES>;
 
 /**
  * Resolve package version from package.json data.
- *
- * @param pkg - Parsed package metadata value.
- *
- * @returns The package version, or `0.0.0` when unavailable.
  */
 function getPackageVersion(pkg: unknown): string {
     if (typeof pkg !== "object" || pkg === null) {

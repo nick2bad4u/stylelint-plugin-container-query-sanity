@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Install and use stylelint-plugin-docusaurus in an ESM Stylelint config.
+description: Install and use stylelint-plugin-container-query-sanity in an ESM Stylelint config.
 ---
 
 # Getting Started
@@ -8,15 +8,15 @@ description: Install and use stylelint-plugin-docusaurus in an ESM Stylelint con
 ## Installation
 
 ```sh
-npm install --save-dev stylelint stylelint-plugin-docusaurus
+npm install --save-dev stylelint stylelint-plugin-container-query-sanity
 ```
 
 ## Quick start with a shareable config
 
 ```js
-import { docusaurusPluginConfigs } from "stylelint-plugin-docusaurus";
+import { containerQuerySanityPluginConfigs } from "stylelint-plugin-container-query-sanity";
 
-export default docusaurusPluginConfigs["docusaurus-recommended"];
+export default containerQuerySanityPluginConfigs["container-query-recommended"];
 ```
 
 ## Quick start with `extends`
@@ -25,30 +25,18 @@ export default docusaurusPluginConfigs["docusaurus-recommended"];
 export default {
  extends: [
   "stylelint-config-standard",
-  "stylelint-config-recess-order",
-  "stylelint-config-idiomatic-order",
-  "stylelint-config-standard-scss",
-  "stylelint-config-tailwindcss",
-  "stylelint-plugin-docusaurus/configs/docusaurus-recommended",
+  "stylelint-plugin-container-query-sanity/configs/container-query-recommended",
  ],
 };
 ```
 
 ## Manual plugin registration
 
-If you prefer to compose rules manually:
-
 ```js
-import docusaurusPlugin from "stylelint-plugin-docusaurus";
-
 export default {
- plugins: ["stylelint-plugin-docusaurus"],
- // Alternative explicit pack form:
- // plugins: [...docusaurusPlugin],
+ plugins: ["stylelint-plugin-container-query-sanity"],
  rules: {
-  "docusaurus/no-mobile-navbar-backdrop-filter": true,
+  "container-query-sanity/require-named-container": true,
  },
 };
 ```
-
-This package default-exports a plugin-pack array, so both plugin registration forms are supported.

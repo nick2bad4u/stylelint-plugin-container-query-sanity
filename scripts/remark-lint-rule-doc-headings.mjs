@@ -125,7 +125,7 @@ const defaultHelperDocPathPattern =
     /(^|\/)docs\/rules\/(?!overview\.md$|getting-started\.md$|presets\/)[^/]+\.md$/u;
 const defaultRuleCatalogIdLinePattern = /^> \*\*Rule catalog ID:\*\* R\d{3}$/u;
 const defaultPackageDocumentationLabelPattern =
-    /^[^\r\n]+ package documentation:$/mu;
+    /^[^\r\n]{1,256} package documentation:$/mu;
 const supportedPluginPackagePrefixes = ["eslint-plugin-", "stylelint-plugin-"];
 
 const packageMetadataCache = new Map();
@@ -722,6 +722,7 @@ export default function remarkLintRuleDocHeadings(options = {}) {
             );
 
             if (
+                // eslint-disable-next-line sonarjs/slow-regex -- Small section-content snippet check for markdown links.
                 !/\[[^\]]+\]\([^)]+\)/u.test(
                     stripMarkdownCode(deprecatedSectionContent)
                 )

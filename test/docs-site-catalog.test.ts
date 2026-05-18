@@ -2,11 +2,29 @@ import { describe, expect, it } from "vitest";
 
 import { configNames, ruleNames } from "../src/plugin";
 
-describe("docs site catalog metadata", () => {
-    it("keeps the homepage/sidebar catalog counts aligned with the plugin exports", async () => {
-        expect.hasAssertions();
+const sortLexicographically = (
+    values: readonly string[]
+): readonly string[] => {
+    const sortedValues: string[] = [];
 
-        /* eslint-disable import-x/no-relative-packages -- this test intentionally validates docs-workspace runtime data within the same monorepo */
+    for (const value of values) {
+        let insertionOffset = sortedValues.length;
+
+        for (const [index, sortedValue] of sortedValues.entries()) {
+            if (value.localeCompare(sortedValue) < 0) {
+                insertionOffset = index;
+                break;
+            }
+        }
+
+        sortedValues.splice(insertionOffset, 0, value);
+    }
+
+    return sortedValues;
+};
+
+describe("docs site catalog metadata", () => {
+    it("keeps the sidebar-derived catalog aligned with plugin exports", async () => {
         const docsCatalogModule =
             (await import("../docs/docusaurus/src/data/docsCatalog")) as {
                 docsCatalogStats: {
@@ -16,30 +34,21 @@ describe("docs site catalog metadata", () => {
                     shareableConfigCount: number;
                 };
             };
-        /* eslint-enable import-x/no-relative-packages -- restore default package-boundary checks after this monorepo-specific import */
+
         const { docsCatalogStats } = docsCatalogModule;
-        const sortedRuleDocIds: string[] = [];
-
-        for (const ruleDocId of docsCatalogStats.ruleDocIds) {
-            const insertionIndex = sortedRuleDocIds.findIndex(
-                (existingRuleDocId) =>
-                    existingRuleDocId.localeCompare(ruleDocId) > 0
-            );
-
-            if (insertionIndex === -1) {
-                sortedRuleDocIds.push(ruleDocId);
-            } else {
-                sortedRuleDocIds.splice(insertionIndex, 0, ruleDocId);
-            }
-        }
 
         expect(docsCatalogStats.publicRuleCount).toBe(ruleNames.length);
-
-        expect(sortedRuleDocIds).toStrictEqual([...ruleNames]);
-
+        expect(
+            sortLexicographically([...docsCatalogStats.ruleDocIds])
+        ).toStrictEqual([...ruleNames]);
+        expect(docsCatalogStats.ruleDocIds).not.toContain("__missing__");
         expect(docsCatalogStats.shareableConfigCount).toBe(configNames.length);
-        expect(docsCatalogStats.configDocIds).toStrictEqual(
-            configNames.map((configName) => `configs/${configName}`)
+        expect(
+            sortLexicographically([...docsCatalogStats.configDocIds])
+        ).toStrictEqual(
+            sortLexicographically(
+                configNames.map((configName) => `configs/${configName}`)
+            )
         );
     });
 });

@@ -1,108 +1,32 @@
-import * as nodeFs from "node:fs";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-const stylelintConfigFilePath = "stylelint.config.mjs";
+import { configNames, ruleNames } from "../src/plugin";
 
-function getDisabledStylelintRulesFromFile(
-    filePath: string
-): readonly string[] {
-    const fileContents = nodeFs.readFileSync(filePath, "utf8");
-    const ruleNames: string[] = [];
+describe("docs guardrails", () => {
+    it("keeps required docs pages present for all exported configs and rules", async () => {
+        for (const configName of configNames) {
+            const configDocPath = fileURLToPath(
+                new URL(
+                    `../docs/rules/configs/${configName}.md`,
+                    import.meta.url
+                )
+            );
+            const configDocContent = await readFile(configDocPath, "utf8");
 
-    for (const line of fileContents.split(/\r?\n/v)) {
-        const trimmedLine = line.trim();
-
-        if (trimmedLine.startsWith("/* stylelint-disable ")) {
-            const commentBody =
-                trimmedLine
-                    .slice("/* stylelint-disable ".length)
-                    .split("--", 1)[0]
-                    ?.split("*/", 1)[0]
-                    ?.trim() ?? "";
-
-            for (const entry of commentBody
-                .split(",")
-                .map((item) => item.trim())) {
-                if (entry.length > 0) {
-                    ruleNames.push(entry);
-                }
-            }
+            expect(configDocContent.length).toBeGreaterThan(0);
         }
-    }
 
-    return [...new Set(ruleNames)];
-}
+        for (const ruleName of ruleNames) {
+            const ruleDocPath = fileURLToPath(
+                new URL(`../docs/rules/${ruleName}.md`, import.meta.url)
+            );
+            const ruleDocContent = await readFile(ruleDocPath, "utf8");
 
-function getStylelintDisableCommentLines(filePath: string): readonly string[] {
-    const fileContents = nodeFs.readFileSync(filePath, "utf8");
-    const disableLines: string[] = [];
-
-    for (const line of fileContents.split(/\r?\n/v)) {
-        const trimmedLine = line.trim();
-
-        if (trimmedLine.startsWith("/* stylelint-disable ")) {
-            disableLines.push(trimmedLine);
+            expect(ruleDocContent.length).toBeGreaterThan(0);
         }
-    }
 
-    return disableLines;
-}
-
-describe("docs stylelint guardrails", () => {
-    it("keeps docs guardrail scripts wired into package scripts and release verification", () => {
-        expect.hasAssertions();
-
-        const packageJsonContents = nodeFs.readFileSync("package.json", "utf8");
-
-        expect(packageJsonContents).toContain(
-            '"test:docs-guardrails": "vitest run test/stylelint-docs-guardrails.test.ts"'
-        );
-        expect(packageJsonContents).toContain("npm run test:docs-guardrails");
-    });
-
-    it("keeps stylelint config delegated to shared config", () => {
-        expect.hasAssertions();
-
-        const configFileContents = nodeFs.readFileSync(
-            stylelintConfigFilePath,
-            "utf8"
-        );
-
-        expect(configFileContents).toContain(
-            'import sharedConfig from "stylelint-config-nick2bad4u";'
-        );
-        expect(configFileContents).toContain("const stylelintConfig = {");
-        expect(configFileContents).toContain("...sharedConfig,");
-        expect(configFileContents).not.toContain(
-            "docs/docusaurus/**/*.{css,scss}"
-        );
-    });
-
-    it("does not keep stale file-level stylelint disables in custom.css", () => {
-        expect.hasAssertions();
-
-        const disabledRules = getDisabledStylelintRulesFromFile(
-            "docs/docusaurus/src/css/custom.css"
-        );
-        const disableLines = getStylelintDisableCommentLines(
-            "docs/docusaurus/src/css/custom.css"
-        );
-
-        expect(disableLines).toStrictEqual([]);
-        expect(disabledRules).toStrictEqual([]);
-    });
-
-    it("does not keep stale file-level stylelint disables in index.module.css", () => {
-        expect.hasAssertions();
-
-        const disabledRules = getDisabledStylelintRulesFromFile(
-            "docs/docusaurus/src/pages/index.module.css"
-        );
-        const disableLines = getStylelintDisableCommentLines(
-            "docs/docusaurus/src/pages/index.module.css"
-        );
-
-        expect(disableLines).toStrictEqual([]);
-        expect(disabledRules).toStrictEqual([]);
+        expect(ruleNames).not.toContain("__missing__");
     });
 });

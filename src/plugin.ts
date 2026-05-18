@@ -1,7 +1,6 @@
 /**
  * @packageDocumentation
- * Public plugin entrypoint for `stylelint-plugin-docusaurus` exports and
- * shareable config wiring.
+ * Public plugin entrypoint for stylelint-plugin-container-query-sanity exports.
  */
 import type { Config, Plugin as StylelintPlugin } from "stylelint";
 
@@ -11,50 +10,44 @@ import type { StylelintPluginRuleContract } from "./_internal/create-stylelint-r
 
 import {
     CONFIG_NAMES as configNamesValue,
-    type DocusaurusConfigName as InternalDocusaurusConfigName,
+    type ContainerQueryConfigName as InternalContainerQueryConfigName,
     PACKAGE_NAME as packageNameValue,
     PACKAGE_VERSION as packageVersionValue,
     PLUGIN_NAMESPACE as pluginNamespaceValue,
 } from "./_internal/plugin-constants.js";
-import { docusaurusRules as docusaurusRulesValue } from "./_internal/rules-registry.js";
+import { containerQuerySanityRules as runtimeRulesValue } from "./_internal/rules-registry.js";
 
-/** Public shareable config map exported by this package. */
-export type DocusaurusConfigMap = Record<
-    DocusaurusConfigName,
-    DocusaurusShareableConfig
+/** Map of public config names to shareable stylelint config objects. */
+export type ContainerQueryConfigMap = Record<
+    ContainerQueryConfigName,
+    ContainerQueryShareableConfig
 >;
-/** Shareable config names exposed by this package. */
-export type DocusaurusConfigName = InternalDocusaurusConfigName;
-/** Public fully-qualified rule ids supported by this package. */
-export type DocusaurusRuleId = `${typeof pluginNamespaceValue}/${string}`;
-
-/** Public unqualified rule names supported by this package. */
-export type DocusaurusRuleName = Extract<
-    keyof typeof docusaurusRulesValue,
+/** Public shareable config names exported by this plugin package. */
+export type ContainerQueryConfigName = InternalContainerQueryConfigName;
+/** Fully qualified stylelint rule ID (`namespace/rule-name`). */
+export type ContainerQueryRuleId = `${typeof pluginNamespaceValue}/${string}`;
+/** Rule names keyed in this plugin package. */
+export type ContainerQueryRuleName = Extract<
+    keyof typeof runtimeRulesValue,
     string
 >;
 
-/** Shareable config shape exported by this package. */
-export type DocusaurusShareableConfig = Config & {
+/** Shape of exported shareable stylelint config objects. */
+export type ContainerQueryShareableConfig = Config & {
     plugins: (string | StylelintPlugin)[];
     rules: NonNullable<Config["rules"]>;
 };
 
-/** Internal ordered registry entry tuple. */
-type DocusaurusRuleEntry = readonly [string, StylelintPluginRuleContract];
-/** Internal runtime rule registry shape. */
-type DocusaurusRulesMap = Readonly<Record<string, StylelintPluginRuleContract>>;
+type RuleEntry = readonly [string, StylelintPluginRuleContract];
+type RulesMap = Readonly<Record<string, StylelintPluginRuleContract>>;
 
-/** Local package metadata values used to avoid import re-export warnings. */
 const packageMetaName = packageNameValue;
 const packageMetaNamespace = pluginNamespaceValue;
 const packageMetaVersion = packageVersionValue;
-/** Local rule registry alias used to avoid import re-export warnings. */
-const runtimeRules = docusaurusRulesValue;
-/** Local config-name alias used to avoid import re-export warnings. */
+const runtimeRules = runtimeRulesValue;
 const publicConfigNames = configNamesValue;
 
-/** Public package metadata exported alongside the plugin pack. */
+/** Package metadata surfaced for docs, tooling, and introspection. */
 export const meta: Readonly<{
     name: string;
     namespace: string;
@@ -65,63 +58,90 @@ export const meta: Readonly<{
     version: packageMetaVersion,
 };
 
-/** Public rule registry keyed by unqualified rule name. */
-export const rules: DocusaurusRulesMap = runtimeRules;
+/** Runtime rule contracts indexed by short rule name. */
+export const rules: RulesMap = runtimeRules;
 
-/** Stable ordered unqualified rule names. */
+/** Deterministic sorted list of exported rule names. */
 export const ruleNames: readonly string[] = objectKeys(rules).toSorted(
     (left, right) => left.localeCompare(right)
 );
 
-/** Stable ordered registry entries used to derive configs and ids. */
-const docusaurusRuleEntries: readonly DocusaurusRuleEntry[] = (() => {
-    const entries: DocusaurusRuleEntry[] = [];
+const ruleEntries: readonly RuleEntry[] = (() => {
+    const entries: RuleEntry[] = [];
 
     for (const ruleName of ruleNames) {
         const rule = rules[ruleName];
 
-        if (!isDefined(rule)) {
-            continue;
+        if (isDefined(rule)) {
+            entries.push([ruleName, rule]);
         }
-
-        entries.push([ruleName, rule]);
     }
 
     return entries;
 })();
 
-/** Default plugin-pack export consumed by Stylelint. */
-export const plugins: readonly StylelintPlugin[] = docusaurusRuleEntries.map(
+/** Ordered plugin list consumed by stylelint `plugins` config field. */
+export const plugins: readonly StylelintPlugin[] = ruleEntries.map(
     ([, rule]) => rule
 );
 
-/** Stable ordered fully qualified rule ids. */
-export const ruleIds: readonly DocusaurusRuleId[] = docusaurusRuleEntries.map(
-    ([, rule]) => rule.ruleName as DocusaurusRuleId
+/** Ordered fully-qualified rule IDs. */
+export const ruleIds: readonly ContainerQueryRuleId[] = ruleEntries.map(
+    ([, rule]) => rule.ruleName as ContainerQueryRuleId
 );
 
-/** Rule ids included in the recommended shareable config. */
-const recommendedRuleIds: readonly DocusaurusRuleId[] = docusaurusRuleEntries
+const recommendedRuleIds: readonly ContainerQueryRuleId[] = ruleEntries
     .filter(([, rule]) => rule.docs.recommended)
-    .map(([, rule]) => rule.ruleName as DocusaurusRuleId);
+    .map(([, rule]) => rule.ruleName as ContainerQueryRuleId);
 
-/**
- * Build one shareable Stylelint config.
- *
- * @param enabledRuleIds - Rule ids to enable in the config.
- *
- * @returns Shareable Stylelint config.
- */
+const strictOnlyRuleNameSuffixes = new Set([
+    "/no-size-query-on-non-size-container",
+    "/no-unknown-container-names",
+    "/prefer-range-syntax",
+    "/require-breakpoint-token-usage",
+]);
+const isStrictOnlyRule = (ruleId: string): boolean => {
+    for (const suffix of strictOnlyRuleNameSuffixes) {
+        if (ruleId.endsWith(suffix)) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+const strictRuleIds: readonly ContainerQueryRuleId[] = ruleEntries
+    .filter(
+        ([, rule]) => rule.docs.recommended || isStrictOnlyRule(rule.ruleName)
+    )
+    .map(([, rule]) => rule.ruleName as ContainerQueryRuleId);
+
 function createConfig(
-    enabledRuleIds: readonly DocusaurusRuleId[]
-): DocusaurusShareableConfig {
+    enabledRuleIds: readonly ContainerQueryRuleId[]
+): ContainerQueryShareableConfig {
     return {
         plugins: [...plugins],
         rules: (() => {
             const rulesConfig: NonNullable<Config["rules"]> = {};
 
             for (const ruleId of enabledRuleIds) {
-                rulesConfig[ruleId] = true;
+                rulesConfig[ruleId] = ruleId.endsWith(
+                    "/require-breakpoint-token-usage"
+                )
+                    ? [
+                          true,
+                          {
+                              allowedUnits: [
+                                  "cqi",
+                                  "cqb",
+                                  "cqw",
+                                  "cqh",
+                                  "cqmin",
+                                  "cqmax",
+                              ],
+                          },
+                      ]
+                    : true;
             }
 
             return rulesConfig;
@@ -129,15 +149,15 @@ function createConfig(
     };
 }
 
-/** Shareable config exports exposed by the package. */
-export const docusaurusPluginConfigs: DocusaurusConfigMap = {
-    "docusaurus-all": createConfig(ruleIds),
-    "docusaurus-docs-safe": createConfig(recommendedRuleIds),
-    "docusaurus-recommended": createConfig(recommendedRuleIds),
+/** Named shareable configs exported by this plugin package. */
+export const containerQuerySanityPluginConfigs: ContainerQueryConfigMap = {
+    "container-query-all": createConfig(ruleIds),
+    "container-query-recommended": createConfig(recommendedRuleIds),
+    "container-query-strict": createConfig(strictRuleIds),
 };
 
-/** Stable ordered shareable config names. */
-export const configNames: readonly DocusaurusConfigName[] = publicConfigNames;
+/** Ordered config names used by docs and validation tooling. */
+export const configNames: readonly ContainerQueryConfigName[] =
+    publicConfigNames;
 
-/** Default export consumed by Stylelint when the package is used as a plugin. */
 export default plugins;
