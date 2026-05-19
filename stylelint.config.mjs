@@ -8,10 +8,7 @@ const normalizedExtends = Array.isArray(sharedConfig.extends)
           (entry) => typeof entry === "string" && !unsupportedExtends.has(entry)
       )
     : [];
-const sharedRules =
-    typeof sharedConfig.rules === "object" && sharedConfig.rules !== null
-        ? sharedConfig.rules
-        : {};
+const sharedRules = sharedConfig.rules ?? {};
 const normalizedRules = Object.fromEntries(
     Object.entries(sharedRules).filter(
         ([ruleName]) => !ruleName.startsWith("docusaurus/")
@@ -19,12 +16,7 @@ const normalizedRules = Object.fromEntries(
 );
 const normalizedOverrides = Array.isArray(sharedConfig.overrides)
     ? sharedConfig.overrides.map((override) => {
-          if (
-              typeof override !== "object" ||
-              override === null ||
-              typeof override.rules !== "object" ||
-              override.rules === null
-          ) {
+          if (override.rules === undefined) {
               return override;
           }
 
@@ -46,9 +38,10 @@ const stylelintConfig = {
     ...sharedConfig,
     extends: normalizedExtends,
     rules: normalizedRules,
-    ...(normalizedOverrides === undefined
-        ? {}
-        : { overrides: normalizedOverrides }),
 };
+
+if (normalizedOverrides !== undefined) {
+    stylelintConfig.overrides = normalizedOverrides;
+}
 
 export default stylelintConfig;
