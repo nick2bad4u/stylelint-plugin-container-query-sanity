@@ -7,6 +7,8 @@ const ruleName =
 
 describe(ruleName, () => {
     it("accepts repeated matching container-type declarations", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container: layout / inline-size; }
@@ -24,6 +26,8 @@ describe(ruleName, () => {
     });
 
     it("reports conflicting type declarations for the same name", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container: layout / inline-size; }

@@ -4,6 +4,8 @@ import { lintWithConfig } from "./_internal/stylelint-test-helpers";
 
 describe("container-query-sanity/no-unknown-container-names", () => {
     it("accepts named queries that match container-name declarations", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {
@@ -26,6 +28,8 @@ describe("container-query-sanity/no-unknown-container-names", () => {
     });
 
     it("accepts named queries that match container shorthand declarations", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .sidebar {
@@ -47,6 +51,8 @@ describe("container-query-sanity/no-unknown-container-names", () => {
     });
 
     it("reports unknown container names when declarations are present", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {
@@ -71,6 +77,8 @@ describe("container-query-sanity/no-unknown-container-names", () => {
     });
 
     it("skips reporting when no declarations exist and fallback mode is enabled", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width > 40rem) {
@@ -88,6 +96,8 @@ describe("container-query-sanity/no-unknown-container-names", () => {
     });
 
     it("can report unknown names when configured to report files without declarations", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width > 40rem) {
@@ -110,6 +120,8 @@ describe("container-query-sanity/no-unknown-container-names", () => {
     });
 
     it("supports an explicit ignore list", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {

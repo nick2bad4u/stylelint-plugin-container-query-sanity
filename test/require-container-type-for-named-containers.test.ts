@@ -7,6 +7,8 @@ const ruleName =
 
 describe(ruleName, () => {
     it("accepts named containers with explicit type declarations", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {
@@ -29,6 +31,8 @@ describe(ruleName, () => {
     });
 
     it("reports type-dependent queries for names declared without container-type", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container-name: layout; }
@@ -48,6 +52,8 @@ describe(ruleName, () => {
     });
 
     it("ignores style queries for normal named containers", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container-name: layout; }

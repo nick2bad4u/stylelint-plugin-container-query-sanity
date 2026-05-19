@@ -6,6 +6,8 @@ import { configNames, ruleNames } from "../src/plugin";
 
 describe("docs guardrails", () => {
     it("keeps required docs pages present for all exported configs and rules", async () => {
+        expect.hasAssertions();
+
         for (const configName of configNames) {
             const configDocPath = fileURLToPath(
                 new URL(

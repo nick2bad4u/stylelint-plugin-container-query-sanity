@@ -4,6 +4,8 @@ import { lintWithConfig } from "./_internal/stylelint-test-helpers";
 
 describe("container-query-sanity/require-breakpoint-token-usage", () => {
     it("reports hardcoded literals", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width > 48rem) {
@@ -22,6 +24,8 @@ describe("container-query-sanity/require-breakpoint-token-usage", () => {
     });
 
     it("allows tokenized literals", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width > var(--cq-layout-md)) {

@@ -4,6 +4,8 @@ import { lintWithConfig } from "./_internal/stylelint-test-helpers";
 
 describe("container-query-sanity/no-unreachable-container-intervals", () => {
     it("reports disjoint nested intervals", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width >= 60rem) {
@@ -24,6 +26,8 @@ describe("container-query-sanity/no-unreachable-container-intervals", () => {
     });
 
     it("allows nested intervals that can overlap", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width >= 60rem) {

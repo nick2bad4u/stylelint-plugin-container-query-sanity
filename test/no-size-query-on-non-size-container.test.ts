@@ -4,6 +4,8 @@ import { lintWithConfig } from "./_internal/stylelint-test-helpers";
 
 describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     it("accepts size queries when the named container declares inline-size", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {
@@ -26,6 +28,8 @@ describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     });
 
     it("accepts shorthand declarations with size-capable type", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .card-grid {
@@ -47,6 +51,8 @@ describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     });
 
     it("reports non-size container-type declarations", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {
@@ -70,6 +76,8 @@ describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     });
 
     it("reports named queries when only scroll-state container types are declared", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .rail {
@@ -92,6 +100,8 @@ describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     });
 
     it("skips style-only queries that do not use size features", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container card style(--theme: dark) {
@@ -109,6 +119,8 @@ describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     });
 
     it("can report missing type declarations when enabled", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout {
@@ -132,6 +144,8 @@ describe("container-query-sanity/no-size-query-on-non-size-container", () => {
     });
 
     it("treats a name as valid when at least one declaration is size-capable", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout-a {

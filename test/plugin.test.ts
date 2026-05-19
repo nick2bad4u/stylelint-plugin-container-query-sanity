@@ -1,10 +1,11 @@
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
-import plugins, {
+import {
     configNames,
     containerQuerySanityPluginConfigs,
     meta,
+    type default as plugins,
     ruleIds,
     ruleNames,
     rules,
@@ -25,28 +26,35 @@ type BuiltCjsPluginModule = Readonly<{
 
 describe("stylelint-plugin-container-query-sanity runtime", () => {
     it("exports stable package metadata", () => {
+        expect.hasAssertions();
+
         expect(meta.name).toBe("stylelint-plugin-container-query-sanity");
         expect(meta.namespace).toBe("container-query-sanity");
         expect(meta.version).toMatch(/^\d+\.\d+\.\d+/v);
     });
 
     it("keeps rule registry exports internally consistent", () => {
+        expect.hasAssertions();
+
         expect(ruleNames).toHaveLength(ruleIds.length);
         expect(Object.keys(rules)).toStrictEqual([...ruleNames]);
 
         for (const ruleId of ruleIds) {
-            expect(ruleId.startsWith("container-query-sanity/")).toBe(true);
+            expect(ruleId).toMatch(/^container-query-sanity\//v);
         }
     });
 
     it("preserves named exports on the built CommonJS entrypoint", () => {
+        expect.hasAssertions();
+
         const builtCjsPlugin =
             require("../dist/plugin.cjs") as BuiltCjsPluginModule;
 
-        expect(Array.isArray(builtCjsPlugin)).toBe(true);
+        expect(builtCjsPlugin).toBeInstanceOf(Array);
         expect(
             Object.keys(builtCjsPlugin.containerQuerySanityPluginConfigs)
         ).toStrictEqual(Object.keys(containerQuerySanityPluginConfigs));
+
         expect(
             builtCjsPlugin.containerQuerySanityPluginConfigs[
                 "container-query-all"
@@ -60,6 +68,8 @@ describe("stylelint-plugin-container-query-sanity runtime", () => {
     });
 
     it("exposes the expected shareable config names", () => {
+        expect.hasAssertions();
+
         expect(configNames).toStrictEqual([
             "container-query-all",
             "container-query-recommended",
@@ -73,8 +83,13 @@ describe("stylelint-plugin-container-query-sanity runtime", () => {
     });
 
     it("lets the recommended config lint baseline CSS without parse errors", async () => {
+        expect.hasAssertions();
+
         const recommendedConfig =
             containerQuerySanityPluginConfigs["container-query-recommended"];
+        const plugins = Array.isArray(recommendedConfig.plugins)
+            ? Array.from(recommendedConfig.plugins)
+            : [recommendedConfig.plugins];
 
         const result = await lintWithConfig({
             code: `
@@ -84,7 +99,7 @@ describe("stylelint-plugin-container-query-sanity runtime", () => {
             `,
             config: {
                 ...recommendedConfig,
-                plugins: [...recommendedConfig.plugins],
+                plugins,
             },
         });
 

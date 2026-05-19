@@ -4,6 +4,8 @@ import { lintWithConfig } from "./_internal/stylelint-test-helpers";
 
 describe("container-query-sanity/prefer-range-syntax", () => {
     it("accepts modern range syntax", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width >= 40rem) and (inline-size < 70rem) {
@@ -22,6 +24,8 @@ describe("container-query-sanity/prefer-range-syntax", () => {
     });
 
     it("reports legacy min-/max- syntax", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container card (min-width: 40rem) and (max-inline-size: 70rem) {
@@ -41,6 +45,8 @@ describe("container-query-sanity/prefer-range-syntax", () => {
     });
 
     it("ignores style queries", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container style(--theme: dark) {

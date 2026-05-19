@@ -7,6 +7,8 @@ const ruleName =
 
 describe(ruleName, () => {
     it("accepts inline-axis queries against inline-size containers", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container: layout / inline-size; }
@@ -26,6 +28,8 @@ describe(ruleName, () => {
     });
 
     it("reports block-axis queries against inline-size containers", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container: layout / inline-size; }
@@ -45,6 +49,8 @@ describe(ruleName, () => {
     });
 
     it("accepts block-axis queries against size containers", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .layout { container: layout / size; }

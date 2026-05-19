@@ -4,6 +4,8 @@ import { lintWithConfig } from "./_internal/stylelint-test-helpers";
 
 describe("container-query-sanity/require-named-container", () => {
     it("reports anonymous container queries", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container (width > 40rem) {
@@ -22,6 +24,8 @@ describe("container-query-sanity/require-named-container", () => {
     });
 
     it("accepts named container queries", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width > 40rem) {

@@ -7,6 +7,8 @@ const ruleName =
 
 describe(ruleName, () => {
     it("accepts scroll-state queries against scroll-state containers", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .pane { container: pane / scroll-state; }
@@ -26,6 +28,8 @@ describe(ruleName, () => {
     });
 
     it("reports scroll-state queries against size-only containers", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 .pane { container: pane / inline-size; }
@@ -45,6 +49,8 @@ describe(ruleName, () => {
     });
 
     it("ignores unnamed scroll-state queries", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container scroll-state(stuck: top) {

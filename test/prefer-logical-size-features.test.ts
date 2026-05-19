@@ -6,6 +6,8 @@ const ruleName = "container-query-sanity/prefer-logical-size-features";
 
 describe(ruleName, () => {
     it("accepts logical size features", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (inline-size >= 40rem) and (block-size < 80rem) {
@@ -24,6 +26,8 @@ describe(ruleName, () => {
     });
 
     it("reports physical width and height features", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (width >= 40rem) and (height < 80rem) {

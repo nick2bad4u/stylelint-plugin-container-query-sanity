@@ -7,6 +7,8 @@ const ruleName =
 
 describe(ruleName, () => {
     it("accepts meaningful lower bounds", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (inline-size > 0px) and (width >= 40rem) {
@@ -25,6 +27,8 @@ describe(ruleName, () => {
     });
 
     it("reports lower bounds that cannot filter non-negative sizes", async () => {
+        expect.hasAssertions();
+
         const result = await lintWithConfig({
             code: `
                 @container layout (inline-size >= 0px) and (width > -1px) {
