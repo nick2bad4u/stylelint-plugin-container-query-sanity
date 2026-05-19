@@ -7,6 +7,7 @@ import {
     type ContainerQueryShareableConfig,
 } from "../plugin.js";
 
+/** Shareable `container-query-strict` preset for stronger enforcement. */
 const containerQueryStrictConfig: ContainerQueryShareableConfig =
     containerQuerySanityPluginConfigs["container-query-strict"];
 

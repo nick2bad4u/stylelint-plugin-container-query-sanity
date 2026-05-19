@@ -7,6 +7,7 @@ import {
     type ContainerQueryShareableConfig,
 } from "../plugin.js";
 
+/** Shareable `container-query-all` preset for exhaustive enforcement. */
 const containerQueryAllConfig: ContainerQueryShareableConfig =
     containerQuerySanityPluginConfigs["container-query-all"];
 

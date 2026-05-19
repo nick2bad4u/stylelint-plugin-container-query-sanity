@@ -72,7 +72,7 @@ const rule =
         primary: boolean,
         secondaryOptions: NoUnknownContainerNamesSecondaryOptions = {}
     ) =>
-    (root: Root, result: PostcssResult) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(
             result,
             ruleName,
@@ -146,7 +146,7 @@ const rule =
         });
     };
 
-function collectDeclaredContainerNames(root: Root): Set<string> {
+function collectDeclaredContainerNames(root: Readonly<Root>): Set<string> {
     const names = new Set<string>();
 
     root.walkDecls((declaration) => {
@@ -290,7 +290,7 @@ function splitWhitespaceTokens(value: string): readonly string[] {
     return tokens;
 }
 
-/** Validate @container names against names declared in the same stylesheet. */
+/** Validate `@container` names against names declared in the same stylesheet. */
 const noUnknownContainerNamesRule: StylelintPluginRuleContract =
     createStylelintRule({
         docs,

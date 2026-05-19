@@ -76,15 +76,14 @@ export const createStylelintRule = <
         ...baseMeta,
         docs,
     };
-    const typedRule = rule as Rule<P, S, M>;
-
-    typedRule.ruleName = ruleName;
-    typedRule.messages = messages;
-    typedRule.meta = meta;
-
-    if (options.primaryOptionArray === true) {
-        typedRule.primaryOptionArray = true;
-    }
+    const typedRule: Rule<P, S, M> = Object.assign(rule, {
+        ...(options.primaryOptionArray === true
+            ? { primaryOptionArray: true as const }
+            : {}),
+        messages,
+        meta,
+        ruleName,
+    });
 
     const plugin = stylelint.createPlugin(ruleName, typedRule);
 

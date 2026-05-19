@@ -2,11 +2,14 @@
  * @packageDocumentation
  * Rule detecting unreachable nested container intervals.
  */
-import stylelint from "stylelint";
+import type { AtRule, Root } from "postcss";
+
+import stylelint, { type PostcssResult } from "stylelint";
 import { isDefined, isEmpty } from "ts-extras";
 
 import {
     collectFeatureConstraints,
+    type FeatureConstraint,
     type FeatureInterval,
     groupConstraintsByFeatureAndUnit,
     type IntervalBound,
@@ -42,10 +45,7 @@ const docs = {
 
 const rule =
     (primary: boolean) =>
-    (
-        root: import("postcss").Root,
-        result: import("stylelint").PostcssResult
-    ) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
@@ -146,15 +146,17 @@ function intervalsAreDisjoint(
     );
 }
 
-function reportIfDisjoint(input: {
-    atRule: import("postcss").AtRule;
-    currentUnitConstraints: readonly import("../_internal/container-query-analysis.js").FeatureConstraint[];
-    feature: string;
-    parentUnitConstraints: readonly import("../_internal/container-query-analysis.js").FeatureConstraint[];
-    result: import("stylelint").PostcssResult;
-    ruleName: string;
-    unit: string;
-}): void {
+function reportIfDisjoint(
+    input: Readonly<{
+        atRule: AtRule;
+        currentUnitConstraints: readonly FeatureConstraint[];
+        feature: string;
+        parentUnitConstraints: readonly FeatureConstraint[];
+        result: Readonly<PostcssResult>;
+        ruleName: string;
+        unit: string;
+    }>
+): void {
     const currentInterval = normalizeInterval(input.currentUnitConstraints);
     const parentInterval = normalizeInterval(input.parentUnitConstraints);
 
@@ -199,6 +201,7 @@ function toComparable(
     };
 }
 
+/** Disallow nested container intervals that can never overlap. */
 const noUnreachableContainerIntervalsRule: StylelintPluginRuleContract =
     createStylelintRule({
         docs,

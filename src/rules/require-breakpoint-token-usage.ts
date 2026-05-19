@@ -1,8 +1,10 @@
 /**
  * @packageDocumentation
- * Rule enforcing breakpoint token usage in @container queries.
+ * Rule enforcing breakpoint token usage in `@container` queries.
  */
-import stylelint from "stylelint";
+import type { Root } from "postcss";
+
+import stylelint, { type PostcssResult } from "stylelint";
 import { setHas } from "ts-extras";
 
 import {
@@ -54,10 +56,7 @@ const rule =
         primary: boolean,
         secondaryOptions: BreakpointTokenRuleSecondaryOptions = {}
     ) =>
-    (
-        root: import("postcss").Root,
-        result: import("stylelint").PostcssResult
-    ) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
@@ -98,6 +97,7 @@ const rule =
         });
     };
 
+/** Require tokenized values instead of hardcoded container breakpoint literals. */
 const requireBreakpointTokenUsageRule: StylelintPluginRuleContract =
     createStylelintRule({
         docs,

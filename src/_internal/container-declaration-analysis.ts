@@ -2,14 +2,15 @@
  * @packageDocumentation
  * Helpers for collecting static container-name and container-type declarations.
  */
-import type { Root } from "postcss";
+import type { Declaration, Root } from "postcss";
 
-import { arrayIncludes, isEmpty, setHas } from "ts-extras";
+import { arrayIncludes, isDefined, isEmpty, setHas } from "ts-extras";
 
 import { isValidContainerName } from "./container-query-analysis.js";
 
 /** Static declaration summary for one named container. */
 export type ContainerTypeSummary = Readonly<{
+    anchorNode: Declaration | undefined;
     declarations: readonly string[];
     hasBlockSizeContainment: boolean;
     hasInlineSizeContainment: boolean;
@@ -20,6 +21,7 @@ export type ContainerTypeSummary = Readonly<{
 }>;
 
 interface MutableContainerTypeSummary {
+    anchorNode: Declaration | undefined;
     declarations: string[];
     hasBlockSizeContainment: boolean;
     hasInlineSizeContainment: boolean;
@@ -45,9 +47,37 @@ const cssWideKeywords = new Set([
 
 /** Collect declared container names and their static container-type summaries. */
 export function collectContainerTypesByName(
-    root: Root
+    root: Readonly<Root>
 ): ReadonlyMap<string, ContainerTypeSummary> {
     const summaries = new Map<string, MutableContainerTypeSummary>();
+    const mergeSummary = (
+        input: Readonly<{
+            anchorNode: Declaration;
+            name: string;
+            nextSummary: ContainerTypeSummary | null;
+        }>
+    ): void => {
+        const target = summaries.get(input.name) ?? createEmptySummary();
+
+        if (!summaries.has(input.name)) {
+            summaries.set(input.name, target);
+        }
+
+        if (input.nextSummary === null) {
+            return;
+        }
+
+        target.anchorNode ??= input.anchorNode;
+        target.declarations.push(...input.nextSummary.declarations);
+        target.hasBlockSizeContainment ||=
+            input.nextSummary.hasBlockSizeContainment;
+        target.hasInlineSizeContainment ||=
+            input.nextSummary.hasInlineSizeContainment;
+        target.hasNormal ||= input.nextSummary.hasNormal;
+        target.hasScrollState ||= input.nextSummary.hasScrollState;
+        target.hasTypeDeclaration ||= input.nextSummary.hasTypeDeclaration;
+        target.hasUnknown ||= input.nextSummary.hasUnknown;
+    };
 
     root.walkRules((ruleNode) => {
         const namesFromLonghands: string[] = [];
@@ -74,13 +104,33 @@ export function collectContainerTypesByName(
                 const shorthand = parseContainerShorthand(declaration.value);
 
                 for (const name of shorthand.names) {
-                    mergeSummary(summaries, name, shorthand.summary);
+                    mergeSummary({
+                        anchorNode: declaration,
+                        name,
+                        nextSummary: shorthand.summary,
+                    });
                 }
             }
         });
 
         for (const name of namesFromLonghands) {
-            mergeSummary(summaries, name, lastLonghandSummary);
+            const anchorNode = ruleNode.nodes.find(
+                (node): node is Declaration =>
+                    node.type === "decl" &&
+                    node.prop.trim().toLowerCase() === "container-name" &&
+                    arrayIncludes(
+                        extractNamesFromContainerNameValue(node.value),
+                        name
+                    )
+            );
+
+            if (isDefined(anchorNode)) {
+                mergeSummary({
+                    anchorNode,
+                    name,
+                    nextSummary: lastLonghandSummary,
+                });
+            }
         }
     });
 
@@ -88,7 +138,9 @@ export function collectContainerTypesByName(
 }
 
 /** Collect declared container names without type details. */
-export function collectDeclaredContainerNames(root: Root): ReadonlySet<string> {
+export function collectDeclaredContainerNames(
+    root: Readonly<Root>
+): ReadonlySet<string> {
     return new Set(collectContainerTypesByName(root).keys());
 }
 
@@ -129,6 +181,7 @@ function containsDynamicFunction(value: string): boolean {
 
 function createEmptySummary(): MutableContainerTypeSummary {
     return {
+        anchorNode: undefined,
         declarations: [],
         hasBlockSizeContainment: false,
         hasInlineSizeContainment: false,
@@ -141,6 +194,7 @@ function createEmptySummary(): MutableContainerTypeSummary {
 
 function createNormalSummary(): ContainerTypeSummary {
     return {
+        anchorNode: undefined,
         declarations: ["normal"],
         hasBlockSizeContainment: false,
         hasInlineSizeContainment: false,
@@ -153,6 +207,7 @@ function createNormalSummary(): ContainerTypeSummary {
 
 function createUnknownSummary(declaration: string): ContainerTypeSummary {
     return {
+        anchorNode: undefined,
         declarations: [declaration],
         hasBlockSizeContainment: false,
         hasInlineSizeContainment: false,
@@ -186,30 +241,6 @@ function extractNamesFromContainerNameValue(value: string): readonly string[] {
     }
 
     return names;
-}
-
-function mergeSummary(
-    summaries: Map<string, MutableContainerTypeSummary>,
-    name: string,
-    nextSummary: ContainerTypeSummary | null
-): void {
-    const target = summaries.get(name) ?? createEmptySummary();
-
-    if (!summaries.has(name)) {
-        summaries.set(name, target);
-    }
-
-    if (nextSummary === null) {
-        return;
-    }
-
-    target.declarations.push(...nextSummary.declarations);
-    target.hasBlockSizeContainment ||= nextSummary.hasBlockSizeContainment;
-    target.hasInlineSizeContainment ||= nextSummary.hasInlineSizeContainment;
-    target.hasNormal ||= nextSummary.hasNormal;
-    target.hasScrollState ||= nextSummary.hasScrollState;
-    target.hasTypeDeclaration ||= nextSummary.hasTypeDeclaration;
-    target.hasUnknown ||= nextSummary.hasUnknown;
 }
 
 function parseContainerShorthand(value: string): Readonly<{
@@ -309,6 +340,7 @@ function parseContainerTypeValue(value: string): ContainerTypeSummary | null {
     }
 
     return {
+        anchorNode: undefined,
         declarations: [lowercaseValue],
         hasBlockSizeContainment: arrayIncludes(tokens, "size"),
         hasInlineSizeContainment:

@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule preferring logical size features in container queries.
  */
-import stylelint from "stylelint";
+import type { Root } from "postcss";
+
+import stylelint, { type PostcssResult } from "stylelint";
 import { arrayJoin, isEmpty, setHas } from "ts-extras";
 
 import {
@@ -44,10 +46,7 @@ const physicalFeatures = new Set<ContainerQueryFeatureName>([
 
 const rule =
     (primary: boolean) =>
-    (
-        root: import("postcss").Root,
-        result: import("stylelint").PostcssResult
-    ) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],

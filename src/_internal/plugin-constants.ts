@@ -4,6 +4,7 @@
  */
 import type { ArrayValues } from "type-fest";
 
+// eslint-disable-next-line import-x/extensions -- Native JSON module specifiers require the explicit .json suffix.
 import packageJson from "../../package.json" with { type: "json" };
 
 /** Public npm package name. */
@@ -28,17 +29,16 @@ export const CONFIG_NAMES = [
 /** Shareable config names exported by the plugin runtime. */
 export type ContainerQueryConfigName = ArrayValues<typeof CONFIG_NAMES>;
 
-/**
- * Resolve package version from package.json data.
- */
 function getPackageVersion(pkg: unknown): string {
-    if (typeof pkg !== "object" || pkg === null) {
-        return "0.0.0";
-    }
+    return hasPackageVersion(pkg) ? pkg.version : "0.0.0";
+}
 
-    const version = Reflect.get(pkg, "version");
-
-    return typeof version === "string" ? version : "0.0.0";
+function hasPackageVersion(pkg: unknown): pkg is Readonly<{ version: string }> {
+    return (
+        typeof pkg === "object" &&
+        pkg !== null &&
+        typeof Reflect.get(pkg, "version") === "string"
+    );
 }
 
 /** Published package version resolved from `package.json`. */

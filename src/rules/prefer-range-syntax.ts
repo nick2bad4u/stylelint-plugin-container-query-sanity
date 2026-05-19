@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule requiring modern range syntax for container size feature queries.
  */
-import stylelint from "stylelint";
+import type { Root } from "postcss";
+
+import stylelint, { type PostcssResult } from "stylelint";
 import { isDefined } from "ts-extras";
 
 import {
@@ -95,10 +97,7 @@ const parseLegacyRangeExpression = (
 
 const rule =
     (primary: boolean) =>
-    (
-        root: import("postcss").Root,
-        result: import("stylelint").PostcssResult
-    ) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
@@ -142,7 +141,7 @@ const rule =
         });
     };
 
-/** Require modern range-comparison syntax in @container size queries. */
+/** Require modern range-comparison syntax in `@container` size queries. */
 const preferRangeSyntaxRule: StylelintPluginRuleContract = createStylelintRule({
     docs,
     messages,

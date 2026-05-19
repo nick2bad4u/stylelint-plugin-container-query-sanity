@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule validating contradictory or mixed-unit container query intervals.
  */
-import stylelint from "stylelint";
+import type { Root } from "postcss";
+
+import stylelint, { type PostcssResult } from "stylelint";
 import { arrayJoin, isDefined, isEmpty } from "ts-extras";
 
 import {
@@ -46,11 +48,13 @@ const docs = {
     url: createRuleDocsUrl("no-invalid-container-query-ranges"),
 } as const;
 
-const formatBound = (bound: {
-    inclusive: boolean;
-    unit: string;
-    value: number;
-}): string =>
+const formatBound = (
+    bound: Readonly<{
+        inclusive: boolean;
+        unit: string;
+        value: number;
+    }>
+): string =>
     `${bound.inclusive ? "[" : "("}${String(bound.value)}${bound.unit}`;
 
 const sortLexicographically = (
@@ -76,10 +80,7 @@ const sortLexicographically = (
 
 const rule =
     (primary: boolean) =>
-    (
-        root: import("postcss").Root,
-        result: import("stylelint").PostcssResult
-    ) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
@@ -144,6 +145,7 @@ const rule =
         });
     };
 
+/** Disallow contradictory and mixed-unit intervals in container queries. */
 const noInvalidContainerQueryRangesRule: StylelintPluginRuleContract =
     createStylelintRule({
         docs,

@@ -46,6 +46,7 @@ const packageMetaNamespace = pluginNamespaceValue;
 const packageMetaVersion = packageVersionValue;
 const runtimeRules = runtimeRulesValue;
 const publicConfigNames = configNamesValue;
+const ruleNamePrefix = `${pluginNamespaceValue}/` as const;
 
 /** Package metadata surfaced for docs, tooling, and introspection. */
 export const meta: Readonly<{
@@ -65,6 +66,10 @@ export const rules: RulesMap = runtimeRules;
 export const ruleNames: readonly string[] = objectKeys(rules).toSorted(
     (left, right) => left.localeCompare(right)
 );
+
+function isContainerQueryRuleId(value: string): value is ContainerQueryRuleId {
+    return value.startsWith(ruleNamePrefix);
+}
 
 const ruleEntries: readonly RuleEntry[] = (() => {
     const entries: RuleEntry[] = [];
@@ -87,12 +92,24 @@ export const plugins: readonly StylelintPlugin[] = ruleEntries.map(
 
 /** Ordered fully-qualified rule IDs. */
 export const ruleIds: readonly ContainerQueryRuleId[] = ruleEntries.map(
-    ([, rule]) => rule.ruleName as ContainerQueryRuleId
+    ([, rule]) => {
+        if (!isContainerQueryRuleId(rule.ruleName)) {
+            throw new TypeError(`Unexpected rule name: ${rule.ruleName}`);
+        }
+
+        return rule.ruleName;
+    }
 );
 
 const recommendedRuleIds: readonly ContainerQueryRuleId[] = ruleEntries
     .filter(([, rule]) => rule.docs.recommended)
-    .map(([, rule]) => rule.ruleName as ContainerQueryRuleId);
+    .map(([, rule]) => {
+        if (!isContainerQueryRuleId(rule.ruleName)) {
+            throw new TypeError(`Unexpected rule name: ${rule.ruleName}`);
+        }
+
+        return rule.ruleName;
+    });
 
 const strictOnlyRuleNameSuffixes = new Set([
     "/no-block-axis-query-on-inline-size-container",
@@ -120,7 +137,13 @@ const strictRuleIds: readonly ContainerQueryRuleId[] = ruleEntries
     .filter(
         ([, rule]) => rule.docs.recommended || isStrictOnlyRule(rule.ruleName)
     )
-    .map(([, rule]) => rule.ruleName as ContainerQueryRuleId);
+    .map(([, rule]) => {
+        if (!isContainerQueryRuleId(rule.ruleName)) {
+            throw new TypeError(`Unexpected rule name: ${rule.ruleName}`);
+        }
+
+        return rule.ruleName;
+    });
 
 function createConfig(
     enabledRuleIds: readonly ContainerQueryRuleId[]

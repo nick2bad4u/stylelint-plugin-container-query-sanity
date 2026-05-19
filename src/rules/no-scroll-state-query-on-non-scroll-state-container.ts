@@ -62,7 +62,7 @@ const rule =
         primary: boolean,
         secondaryOptions: NoScrollStateQueryOnNonScrollStateContainerSecondaryOptions = {}
     ) =>
-    (root: Root, result: PostcssResult) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],

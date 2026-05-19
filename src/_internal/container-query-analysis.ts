@@ -207,7 +207,9 @@ export function groupConstraintsByFeatureAndUnit(
     >();
 
     for (const constraint of constraints) {
-        const byUnit = grouped.get(constraint.feature) ?? new Map();
+        const byUnit =
+            grouped.get(constraint.feature) ??
+            new Map<string, FeatureConstraint[]>();
 
         if (!grouped.has(constraint.feature)) {
             grouped.set(constraint.feature, byUnit);
@@ -224,7 +226,7 @@ export function groupConstraintsByFeatureAndUnit(
         }
 
         for (const unit of units) {
-            const unitConstraints = byUnit.get(unit) ?? [];
+            const unitConstraints: FeatureConstraint[] = byUnit.get(unit) ?? [];
 
             if (!byUnit.has(unit)) {
                 byUnit.set(unit, unitConstraints);
@@ -507,13 +509,15 @@ function isWhitespace(character: string): boolean {
     );
 }
 
-function parseAscendingBoundedConstraint(input: {
-    featureMiddle: ContainerSizeFeature | undefined;
-    firstOperator: RangeOperator;
-    leftDimension: ParsedDimension | undefined;
-    rightDimension: ParsedDimension | undefined;
-    secondOperator: RangeOperator;
-}): FeatureConstraint | undefined {
+function parseAscendingBoundedConstraint(
+    input: Readonly<{
+        featureMiddle: ContainerSizeFeature | undefined;
+        firstOperator: RangeOperator;
+        leftDimension: ParsedDimension | undefined;
+        rightDimension: ParsedDimension | undefined;
+        secondOperator: RangeOperator;
+    }>
+): FeatureConstraint | undefined {
     if (
         !isDefined(input.featureMiddle) ||
         !isDefined(input.leftDimension) ||
@@ -592,13 +596,15 @@ function parseBoundedComparison(
     });
 }
 
-function parseDescendingBoundedConstraint(input: {
-    featureFirst: ContainerSizeFeature | undefined;
-    firstOperator: RangeOperator;
-    lastDimension: ParsedDimension | undefined;
-    middleDimension: ParsedDimension | undefined;
-    secondOperator: RangeOperator;
-}): FeatureConstraint | undefined {
+function parseDescendingBoundedConstraint(
+    input: Readonly<{
+        featureFirst: ContainerSizeFeature | undefined;
+        firstOperator: RangeOperator;
+        lastDimension: ParsedDimension | undefined;
+        middleDimension: ParsedDimension | undefined;
+        secondOperator: RangeOperator;
+    }>
+): FeatureConstraint | undefined {
     if (
         !isDefined(input.featureFirst) ||
         !isDefined(input.middleDimension) ||

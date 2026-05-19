@@ -2,7 +2,9 @@
  * @packageDocumentation
  * Rule detecting container query bounds that cannot filter any real size.
  */
-import stylelint from "stylelint";
+import type { Root } from "postcss";
+
+import stylelint, { type PostcssResult } from "stylelint";
 import { isDefined, setHas } from "ts-extras";
 
 import {
@@ -39,10 +41,7 @@ const docs = {
 
 const rule =
     (primary: boolean) =>
-    (
-        root: import("postcss").Root,
-        result: import("stylelint").PostcssResult
-    ) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],

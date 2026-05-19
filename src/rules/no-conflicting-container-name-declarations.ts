@@ -5,7 +5,7 @@
 import type { Root } from "postcss";
 
 import stylelint, { type PostcssResult } from "stylelint";
-import { arrayJoin, setHas } from "ts-extras";
+import { arrayJoin, isDefined, setHas } from "ts-extras";
 
 import { collectContainerTypesByName } from "../_internal/container-declaration-analysis.js";
 import {
@@ -47,7 +47,7 @@ const rule =
         primary: boolean,
         secondaryOptions: NoConflictingContainerNameDeclarationsSecondaryOptions = {}
     ) =>
-    (root: Root, result: PostcssResult) => {
+    (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
         const validOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
@@ -72,13 +72,16 @@ const rule =
                     ),
                 ]);
 
-                if (staticDeclarations.length > 1) {
+                if (
+                    staticDeclarations.length > 1 &&
+                    isDefined(summary.anchorNode)
+                ) {
                     report({
                         message: messages.conflictingDeclaration(
                             containerName,
                             arrayJoin(staticDeclarations, ", ")
                         ),
-                        node: root,
+                        node: summary.anchorNode,
                         result,
                         ruleName,
                     });
