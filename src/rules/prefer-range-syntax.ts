@@ -5,7 +5,7 @@
 import type { Root } from "postcss";
 
 import stylelint, { type PostcssResult } from "stylelint";
-import { isDefined } from "ts-extras";
+import { arrayIncludes, isDefined } from "ts-extras";
 
 import {
     extractParenthesizedExpressions,
@@ -53,7 +53,14 @@ const isLegacyRangeDirection = (value: string): value is LegacyRangeDirection =>
     value === "max" || value === "min";
 
 const isLegacyRangeFeature = (value: string): value is LegacyRangeFeature =>
-    value === "block-size" || value === "inline-size" || value === "width";
+    arrayIncludes(
+        [
+            "block-size",
+            "inline-size",
+            "width",
+        ],
+        value
+    );
 
 const parseLegacyRangeExpression = (
     expression: string

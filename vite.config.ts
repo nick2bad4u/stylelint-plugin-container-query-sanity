@@ -1,5 +1,5 @@
 // eslint-disable-next-line @eslint-community/eslint-comments/disable-enable-pair -- project-wide disable pattern for build configs
-/* eslint-disable n/no-process-env, comment-length/limit-single-line-comments   -- Disable specific rules for build configs */
+/* eslint-disable comment-length/limit-single-line-comments   -- Disable specific rules for build configs */
 
 import pc from "picocolors";
 import {
@@ -13,8 +13,8 @@ const isCiEnvironment = process.env["CI"] === "true";
 /** Raw worker-count input from environment or CI/local defaults. */
 const configuredMaxWorkers =
     process.env["MAX_THREADS"] ?? (isCiEnvironment ? "1" : "8");
-/** Parsed integer worker count prior to validation. */
-const parsedMaxWorkers = Number.parseInt(configuredMaxWorkers, 10);
+/** Parsed numeric worker count prior to validation. */
+const parsedMaxWorkers = Number(configuredMaxWorkers);
 /** Safe positive worker-count used by Vitest thread pool settings. */
 const maxWorkerCount =
     Number.isFinite(parsedMaxWorkers) && parsedMaxWorkers > 0

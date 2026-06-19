@@ -18,10 +18,13 @@ Container size features like `width`, `inline-size`, and `block-size` require si
 Or:
 
 ```js
-[true, {
+[
+ true,
+ {
   ignoreNames: ["framework-shell"],
-  whenTypeUnknown: "ignore" // or "report"
-}]
+  whenTypeUnknown: "ignore", // or "report"
+ },
+];
 ```
 
 - `ignoreNames`: optional name allowlist.
@@ -33,26 +36,26 @@ Or:
 
 ```css
 .layout {
-  container-name: layout;
-  container-type: normal;
+ container-name: layout;
+ container-type: normal;
 }
 
 @container layout (width > 40rem) {
-  .card {
-    display: grid;
-  }
+ .card {
+  display: grid;
+ }
 }
 ```
 
 ```css
 .rail {
-  container: rail / scroll-state;
+ container: rail / scroll-state;
 }
 
 @container rail (inline-size > 50rem) {
-  .chip {
-    display: inline-flex;
-  }
+ .chip {
+  display: inline-flex;
+ }
 }
 ```
 
@@ -60,25 +63,25 @@ Or:
 
 ```css
 .layout {
-  container-name: layout;
-  container-type: inline-size;
+ container-name: layout;
+ container-type: inline-size;
 }
 
 @container layout (width > 40rem) {
-  .card {
-    display: grid;
-  }
+ .card {
+  display: grid;
+ }
 }
 ```
 
 ```css
 .cards {
-  container: cards / size;
+ container: cards / size;
 }
 
 @container cards (inline-size >= 30rem) {
-  .card {
-    display: grid;
-  }
+ .card {
+  display: grid;
+ }
 }
 ```

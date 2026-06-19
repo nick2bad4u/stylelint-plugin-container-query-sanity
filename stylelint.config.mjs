@@ -1,8 +1,17 @@
 import sharedConfig from "stylelint-config-nick2bad4u";
 
 const unsupportedExtends = new Set([
+    "stylelint-plugin-css-performance-budget/configs/performance-budget-all",
     "stylelint-plugin-docusaurus/configs/docusaurus-all",
+    "stylelint-plugin-font/configs/font-all",
+    "stylelint-plugin-grid/configs/grid-all",
 ]);
+const unsupportedRulePrefixes = [
+    "docusaurus/",
+    "font/",
+    "grid/",
+    "performance-budget/",
+];
 const normalizedExtends = Array.isArray(sharedConfig.extends)
     ? sharedConfig.extends.filter(
           (entry) => typeof entry === "string" && !unsupportedExtends.has(entry)
@@ -10,8 +19,8 @@ const normalizedExtends = Array.isArray(sharedConfig.extends)
     : [];
 const sharedRules = sharedConfig.rules ?? {};
 const normalizedRules = Object.fromEntries(
-    Object.entries(sharedRules).filter(
-        ([ruleName]) => !ruleName.startsWith("docusaurus/")
+    Object.entries(sharedRules).filter(([ruleName]) =>
+        unsupportedRulePrefixes.every((prefix) => !ruleName.startsWith(prefix))
     )
 );
 const normalizedOverrides = Array.isArray(sharedConfig.overrides)
@@ -21,8 +30,10 @@ const normalizedOverrides = Array.isArray(sharedConfig.overrides)
           }
 
           const overrideRules = Object.fromEntries(
-              Object.entries(override.rules).filter(
-                  ([ruleName]) => !ruleName.startsWith("docusaurus/")
+              Object.entries(override.rules).filter(([ruleName]) =>
+                  unsupportedRulePrefixes.every(
+                      (prefix) => !ruleName.startsWith(prefix)
+                  )
               )
           );
 

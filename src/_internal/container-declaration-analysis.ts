@@ -8,6 +8,8 @@ import { arrayIncludes, isDefined, isEmpty, setHas } from "ts-extras";
 
 import { isValidContainerName } from "./container-query-analysis.js";
 
+const whitespaceCharacterPattern = /^[\t\n\r ]$/v;
+
 /** Static declaration summary for one named container. */
 export type ContainerTypeSummary = Readonly<{
     anchorNode: Declaration | undefined;
@@ -151,10 +153,7 @@ export function splitWhitespaceTokens(value: string): readonly string[] {
 
     for (const character of value) {
         const isWhitespaceCharacter =
-            character === " " ||
-            character === "\n" ||
-            character === "\r" ||
-            character === "\t";
+            whitespaceCharacterPattern.test(character);
 
         if (isWhitespaceCharacter) {
             if (currentToken !== "") {
@@ -171,12 +170,6 @@ export function splitWhitespaceTokens(value: string): readonly string[] {
     }
 
     return tokens;
-}
-
-function containsDynamicFunction(value: string): boolean {
-    const normalized = value.toLowerCase();
-
-    return normalized.includes("env(") || normalized.includes("var(");
 }
 
 function createEmptySummary(): MutableContainerTypeSummary {
@@ -225,7 +218,7 @@ function extractNamesFromContainerNameValue(value: string): readonly string[] {
     if (
         trimmedValue === "" ||
         setHas(cssWideKeywords, lowercaseValue) ||
-        containsDynamicFunction(trimmedValue)
+        hasDynamicFunction(trimmedValue)
     ) {
         return [];
     }
@@ -243,6 +236,12 @@ function extractNamesFromContainerNameValue(value: string): readonly string[] {
     return names;
 }
 
+function hasDynamicFunction(value: string): boolean {
+    const normalized = value.toLowerCase();
+
+    return normalized.includes("env(") || normalized.includes("var(");
+}
+
 function parseContainerShorthand(value: string): Readonly<{
     names: readonly string[];
     summary: ContainerTypeSummary | null;
@@ -256,7 +255,7 @@ function parseContainerShorthand(value: string): Readonly<{
         };
     }
 
-    if (containsDynamicFunction(trimmedValue)) {
+    if (hasDynamicFunction(trimmedValue)) {
         return {
             names: [],
             summary: createUnknownSummary(trimmedValue),
@@ -324,7 +323,7 @@ function parseContainerTypeValue(value: string): ContainerTypeSummary | null {
 
     if (
         setHas(cssWideKeywords, lowercaseValue) ||
-        containsDynamicFunction(trimmedValue)
+        hasDynamicFunction(trimmedValue)
     ) {
         return createUnknownSummary(trimmedValue);
     }

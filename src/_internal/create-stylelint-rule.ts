@@ -76,14 +76,22 @@ export const createStylelintRule = <
         ...baseMeta,
         docs,
     };
-    const typedRule: Rule<P, S, M> = Object.assign(rule, {
-        ...(options.primaryOptionArray === true
-            ? { primaryOptionArray: true as const }
-            : {}),
+    const typedRuleMetadata: {
+        messages: M;
+        meta: Readonly<{ docs: StylelintRuleDocs }> & RuleMeta;
+        primaryOptionArray?: true;
+        ruleName: string;
+    } = {
         messages,
         meta,
         ruleName,
-    });
+    };
+
+    if (options.primaryOptionArray === true) {
+        typedRuleMetadata.primaryOptionArray = true;
+    }
+
+    const typedRule: Rule<P, S, M> = Object.assign(rule, typedRuleMetadata);
 
     const plugin = stylelint.createPlugin(ruleName, typedRule);
 

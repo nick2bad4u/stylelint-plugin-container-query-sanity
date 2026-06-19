@@ -17,21 +17,21 @@ Use them from `containerQuerySanityPluginConfigs` or from `extends` subpath expo
 
 **Legend:** ✅ = enabled · — = not enabled
 
-| Rule | 🟡 Recommended | 🔴 Strict | 🟣 All |
-| --- | :-: | :-: | :-: |
-| [`no-block-axis-query-on-inline-size-container`](../no-block-axis-query-on-inline-size-container.md) | — | ✅ | ✅ |
-| [`no-conflicting-container-name-declarations`](../no-conflicting-container-name-declarations.md) | — | ✅ | ✅ |
-| [`no-degenerate-container-query-conditions`](../no-degenerate-container-query-conditions.md) | — | ✅ | ✅ |
-| [`no-invalid-container-query-ranges`](../no-invalid-container-query-ranges.md) | ✅ | ✅ | ✅ |
-| [`no-scroll-state-query-on-non-scroll-state-container`](../no-scroll-state-query-on-non-scroll-state-container.md) | — | ✅ | ✅ |
-| [`no-size-query-on-non-size-container`](../no-size-query-on-non-size-container.md) | — | ✅ | ✅ |
-| [`no-unknown-container-names`](../no-unknown-container-names.md) | — | ✅ | ✅ |
-| [`no-unreachable-container-intervals`](../no-unreachable-container-intervals.md) | ✅ | ✅ | ✅ |
-| [`prefer-logical-size-features`](../prefer-logical-size-features.md) | — | ✅ | ✅ |
-| [`prefer-range-syntax`](../prefer-range-syntax.md) | — | ✅ | ✅ |
-| [`require-breakpoint-token-usage`](../require-breakpoint-token-usage.md) | — | ✅ | ✅ |
-| [`require-container-type-for-named-containers`](../require-container-type-for-named-containers.md) | — | ✅ | ✅ |
-| [`require-named-container`](../require-named-container.md) | ✅ | ✅ | ✅ |
+| Rule                                                                                                               | 🟡 Recommended | 🔴 Strict | 🟣 All |
+| ------------------------------------------------------------------------------------------------------------------ | :------------: | :-------: | :----: |
+| [`no-block-axis-query-on-inline-size-container`](../no-block-axis-query-on-inline-size-container.md)               |       —        |    ✅     |   ✅   |
+| [`no-conflicting-container-name-declarations`](../no-conflicting-container-name-declarations.md)                   |       —        |    ✅     |   ✅   |
+| [`no-degenerate-container-query-conditions`](../no-degenerate-container-query-conditions.md)                       |       —        |    ✅     |   ✅   |
+| [`no-invalid-container-query-ranges`](../no-invalid-container-query-ranges.md)                                     |       ✅       |    ✅     |   ✅   |
+| [`no-scroll-state-query-on-non-scroll-state-container`](../no-scroll-state-query-on-non-scroll-state-container.md) |       —        |    ✅     |   ✅   |
+| [`no-size-query-on-non-size-container`](../no-size-query-on-non-size-container.md)                                 |       —        |    ✅     |   ✅   |
+| [`no-unknown-container-names`](../no-unknown-container-names.md)                                                   |       —        |    ✅     |   ✅   |
+| [`no-unreachable-container-intervals`](../no-unreachable-container-intervals.md)                                   |       ✅       |    ✅     |   ✅   |
+| [`prefer-logical-size-features`](../prefer-logical-size-features.md)                                               |       —        |    ✅     |   ✅   |
+| [`prefer-range-syntax`](../prefer-range-syntax.md)                                                                 |       —        |    ✅     |   ✅   |
+| [`require-breakpoint-token-usage`](../require-breakpoint-token-usage.md)                                           |       —        |    ✅     |   ✅   |
+| [`require-container-type-for-named-containers`](../require-container-type-for-named-containers.md)                 |       —        |    ✅     |   ✅   |
+| [`require-named-container`](../require-named-container.md)                                                         |       ✅       |    ✅     |   ✅   |
 
 ## Which config should I use?
 

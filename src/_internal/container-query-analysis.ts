@@ -68,6 +68,7 @@ const sizeQueryFeatureNames = new Set<ContainerQueryFeatureName>([
     "orientation",
     "width",
 ]);
+const whitespaceCharacterPattern = /^[\t\n\r ]$/v;
 
 /** Collect feature constraints from one container-query condition. */
 export function collectFeatureConstraints(
@@ -109,36 +110,6 @@ export function collectSizeQueryFeatureNames(
     }
 
     return sortLexicographically([...featureNames]);
-}
-
-/** Return whether the condition contains a function-style query. */
-export function conditionContainsQueryFunction(
-    condition: string,
-    functionName: "scroll-state" | "style"
-): boolean {
-    const normalizedFunctionName = functionName.toLowerCase();
-    const normalizedCondition = condition.toLowerCase();
-
-    for (let index = 0; index < normalizedCondition.length; index += 1) {
-        const nextIndex = index + normalizedFunctionName.length;
-        const matchesFunctionName =
-            normalizedCondition.slice(index, nextIndex) ===
-            normalizedFunctionName;
-
-        if (matchesFunctionName) {
-            const previousCharacter = normalizedCondition[index - 1];
-            const nextCharacter = normalizedCondition[nextIndex];
-
-            if (
-                !isIdentifierCharacterOrHyphen(previousCharacter) &&
-                nextCharacter === "("
-            ) {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 /** Collect all literal length values from one container-query condition. */
@@ -239,6 +210,36 @@ export function groupConstraintsByFeatureAndUnit(
     return grouped;
 }
 
+/** Return whether the condition contains a function-style query. */
+export function hasQueryFunctionCondition(
+    condition: string,
+    functionName: "scroll-state" | "style"
+): boolean {
+    const normalizedFunctionName = functionName.toLowerCase();
+    const normalizedCondition = condition.toLowerCase();
+
+    for (let index = 0; index < normalizedCondition.length; index += 1) {
+        const nextIndex = index + normalizedFunctionName.length;
+        const isFunctionNameMatch =
+            normalizedCondition.slice(index, nextIndex) ===
+            normalizedFunctionName;
+
+        if (isFunctionNameMatch) {
+            const previousCharacter = normalizedCondition[index - 1];
+            const nextCharacter = normalizedCondition[nextIndex];
+
+            if (
+                !isIdentifierCharacterOrHyphen(previousCharacter) &&
+                nextCharacter === "("
+            ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 /** Return true when an interval cannot match any value. */
 export function isIntervalEmpty(interval: FeatureInterval): boolean {
     const lower = interval.lower;
@@ -310,10 +311,20 @@ export function normalizeInterval(
         }
     }
 
-    return {
-        ...(isDefined(bounds.lower) ? { lower: bounds.lower } : {}),
-        ...(isDefined(bounds.upper) ? { upper: bounds.upper } : {}),
-    };
+    const mergedBounds: {
+        lower?: IntervalBound;
+        upper?: IntervalBound;
+    } = {};
+
+    if (isDefined(bounds.lower)) {
+        mergedBounds.lower = bounds.lower;
+    }
+
+    if (isDefined(bounds.upper)) {
+        mergedBounds.upper = bounds.upper;
+    }
+
+    return mergedBounds;
 }
 
 /**
@@ -327,10 +338,9 @@ export function parseContainerQueryParams(
     const firstParenOffset = trimmedParams.indexOf("(");
 
     if (firstParenOffset === -1) {
-        return {
-            condition: "",
-            ...(trimmedParams === "" ? {} : { containerName: trimmedParams }),
-        };
+        return trimmedParams === ""
+            ? { condition: "" }
+            : { condition: "", containerName: trimmedParams };
     }
 
     const prefix = trimmedParams.slice(0, firstParenOffset).trim();
@@ -341,18 +351,20 @@ export function parseContainerQueryParams(
             prefix.length - functionalConditionName.length;
         const containerName = prefix.slice(0, conditionStartOffset).trim();
 
-        return {
-            condition: trimmedParams.slice(conditionStartOffset).trim(),
-            ...(containerName === "" ? {} : { containerName }),
-        };
+        const condition = trimmedParams.slice(conditionStartOffset).trim();
+
+        return containerName === ""
+            ? { condition }
+            : { condition, containerName };
     }
 
     const nameCandidate = prefix;
 
-    return {
-        condition: trimmedParams.slice(firstParenOffset).trim(),
-        ...(nameCandidate === "" ? {} : { containerName: nameCandidate }),
-    };
+    const condition = trimmedParams.slice(firstParenOffset).trim();
+
+    return nameCandidate === ""
+        ? { condition }
+        : { condition, containerName: nameCandidate };
 }
 
 function createFeatureComparisonConstraint(
@@ -486,10 +498,10 @@ function isUnitCharacter(character: string | undefined): boolean {
 }
 
 function isValidIdentifierStart(containerName: string): boolean {
-    const firstCharacter = containerName[0];
+    const firstCharacter = containerName.at(0);
 
     if (firstCharacter === "-") {
-        const secondCharacter = containerName[1];
+        const secondCharacter = containerName.at(1);
 
         return (
             secondCharacter === "-" ||
@@ -501,12 +513,7 @@ function isValidIdentifierStart(containerName: string): boolean {
 }
 
 function isWhitespace(character: string): boolean {
-    return (
-        character === " " ||
-        character === "\n" ||
-        character === "\r" ||
-        character === "\t"
-    );
+    return whitespaceCharacterPattern.test(character);
 }
 
 function parseAscendingBoundedConstraint(
@@ -695,7 +702,7 @@ function parseDimensionAt(
     }
 
     const unit = value.slice(unitStart, index).toLowerCase();
-    const parsedValue = Number.parseFloat(numberToken);
+    const parsedValue = Number(numberToken);
 
     if (!isNumberFinite(parsedValue)) {
         return undefined;
@@ -821,11 +828,18 @@ function parseLegacyFeatureName(
 }
 
 function parseOperator(token: string): RangeOperator | undefined {
-    if (token === "<" || token === "<=" || token === ">" || token === ">=") {
-        return token;
-    }
+    switch (token) {
+        case "<":
+        case "<=":
+        case ">":
+        case ">=": {
+            return token;
+        }
 
-    return undefined;
+        default: {
+            return undefined;
+        }
+    }
 }
 
 function parseRangeSyntaxConstraints(
@@ -945,14 +959,11 @@ function sortLexicographically<Value extends string>(
     const sorted: Value[] = [];
 
     for (const value of values) {
-        let insertionIndex = sorted.length;
-
-        for (const [index, sortedValue] of sorted.entries()) {
-            if (value.localeCompare(sortedValue) < 0) {
-                insertionIndex = index;
-                break;
-            }
-        }
+        const firstGreaterIndex = sorted.findIndex(
+            (sortedValue) => value.localeCompare(sortedValue) < 0
+        );
+        const insertionIndex =
+            firstGreaterIndex === -1 ? sorted.length : firstGreaterIndex;
 
         sorted.splice(insertionIndex, 0, value);
     }
@@ -965,10 +976,12 @@ function tokenizeExpression(expression: string): readonly string[] {
     let buffer = "";
 
     const pushBuffer = (): void => {
-        if (buffer !== "") {
-            tokens.push(buffer.toLowerCase());
-            buffer = "";
+        if (buffer === "") {
+            return;
         }
+
+        tokens.push(buffer.toLowerCase());
+        buffer = "";
     };
 
     for (let index = 0; index < expression.length; index += 1) {

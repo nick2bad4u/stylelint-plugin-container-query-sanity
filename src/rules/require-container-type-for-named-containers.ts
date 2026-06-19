@@ -11,7 +11,7 @@ import { isDefined, isEmpty, setHas } from "ts-extras";
 import { collectContainerTypesByName } from "../_internal/container-declaration-analysis.js";
 import {
     collectSizeQueryFeatureNames,
-    conditionContainsQueryFunction,
+    hasQueryFunctionCondition,
     parseContainerQueryParams,
 } from "../_internal/container-query-analysis.js";
 import {
@@ -51,12 +51,12 @@ const rule =
         secondaryOptions: RequireContainerTypeForNamedContainersSecondaryOptions = {}
     ) =>
     (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
-        const validOptions = validateOptions(result, ruleName, {
+        const isValidOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
         });
 
-        if (!validOptions) {
+        if (!isValidOptions) {
             return;
         }
 
@@ -77,15 +77,12 @@ const rule =
             }
 
             const summary = summaryByName.get(containerName);
-            const usesTypeDependentQuery =
+            const isUsesTypeDependentQuery =
                 !isEmpty(collectSizeQueryFeatureNames(parsed.condition)) ||
-                conditionContainsQueryFunction(
-                    parsed.condition,
-                    "scroll-state"
-                );
+                hasQueryFunctionCondition(parsed.condition, "scroll-state");
 
             if (
-                usesTypeDependentQuery &&
+                isUsesTypeDependentQuery &&
                 isDefined(summary) &&
                 !summary.hasTypeDeclaration
             ) {

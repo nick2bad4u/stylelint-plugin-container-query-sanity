@@ -10,7 +10,7 @@ import { isDefined, setHas } from "ts-extras";
 
 import { collectContainerTypesByName } from "../_internal/container-declaration-analysis.js";
 import {
-    conditionContainsQueryFunction,
+    hasQueryFunctionCondition,
     parseContainerQueryParams,
 } from "../_internal/container-query-analysis.js";
 import {
@@ -63,12 +63,12 @@ const rule =
         secondaryOptions: NoScrollStateQueryOnNonScrollStateContainerSecondaryOptions = {}
     ) =>
     (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
-        const validOptions = validateOptions(result, ruleName, {
+        const isValidOptions = validateOptions(result, ruleName, {
             actual: primary,
             possible: [true],
         });
 
-        if (!validOptions) {
+        if (!isValidOptions) {
             return;
         }
 
@@ -83,12 +83,7 @@ const rule =
             const parsed = parseContainerQueryParams(atRule.params);
             const containerName = parsed.containerName;
 
-            if (
-                !conditionContainsQueryFunction(
-                    parsed.condition,
-                    "scroll-state"
-                )
-            ) {
+            if (!hasQueryFunctionCondition(parsed.condition, "scroll-state")) {
                 return;
             }
 

@@ -111,6 +111,9 @@
         "test/fixtures/**"
     ],
     "include": [
+        "knip.config.ts",
+        "plugin.d.mts",
+        "vitest.stryker.config.ts",
         "src/**/*.d.ts",
         "src/**/*.ts",
         "test/**/*.d.ts",

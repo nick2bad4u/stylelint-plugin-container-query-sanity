@@ -43,6 +43,7 @@ const containerTypeKeywords = new Set([
     "scroll-state",
     "size",
 ]);
+const whitespaceCharacterPattern = /^[\t\n\r ]$/v;
 
 const undeclaredContainerNameMessage = (
     containerName: string,
@@ -73,7 +74,7 @@ const rule =
         secondaryOptions: NoUnknownContainerNamesSecondaryOptions = {}
     ) =>
     (root: Readonly<Root>, result: Readonly<PostcssResult>) => {
-        const validOptions = validateOptions(
+        const isValidOptions = validateOptions(
             result,
             ruleName,
             {
@@ -100,7 +101,7 @@ const rule =
             }
         );
 
-        if (!validOptions) {
+        if (!isValidOptions) {
             return;
         }
 
@@ -175,12 +176,6 @@ function collectDeclaredContainerNames(root: Readonly<Root>): Set<string> {
     return names;
 }
 
-function containsDynamicFunction(value: string): boolean {
-    const normalized = value.toLowerCase();
-
-    return normalized.includes("env(") || normalized.includes("var(");
-}
-
 function extractNamesFromContainerNameValue(value: string): readonly string[] {
     const trimmedValue = value.trim();
     const lowercaseValue = trimmedValue.toLowerCase();
@@ -188,7 +183,7 @@ function extractNamesFromContainerNameValue(value: string): readonly string[] {
     if (
         trimmedValue === "" ||
         setHas(cssWideKeywords, lowercaseValue) ||
-        containsDynamicFunction(trimmedValue)
+        hasDynamicFunction(trimmedValue)
     ) {
         return [];
     }
@@ -211,7 +206,7 @@ function extractNamesFromContainerShorthandValue(
 ): readonly string[] {
     const trimmedValue = value.trim();
 
-    if (trimmedValue === "" || containsDynamicFunction(trimmedValue)) {
+    if (trimmedValue === "" || hasDynamicFunction(trimmedValue)) {
         return [];
     }
 
@@ -262,16 +257,19 @@ function extractNamesFromContainerShorthandValue(
     return names;
 }
 
+function hasDynamicFunction(value: string): boolean {
+    const normalized = value.toLowerCase();
+
+    return normalized.includes("env(") || normalized.includes("var(");
+}
+
 function splitWhitespaceTokens(value: string): readonly string[] {
     const tokens: string[] = [];
     let currentToken = "";
 
     for (const character of value) {
         const isWhitespaceCharacter =
-            character === " " ||
-            character === "\n" ||
-            character === "\r" ||
-            character === "\t";
+            whitespaceCharacterPattern.test(character);
 
         if (isWhitespaceCharacter) {
             if (currentToken !== "") {
