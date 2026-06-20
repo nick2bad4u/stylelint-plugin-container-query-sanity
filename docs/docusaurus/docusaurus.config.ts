@@ -79,20 +79,16 @@ const suppressKnownWebpackWarningsPlugin: PluginModule = () => ({
             ],
             resolve: {
                 alias: {
-                    ...(vscodeCssLanguageServiceEsmEntry === undefined
-                        ? {}
-                        : {
-                              "vscode-css-languageservice$":
-                                  vscodeCssLanguageServiceEsmEntry,
-                          }),
-                    ...(vscodeLanguageServerTypesEsmEntry === undefined
-                        ? {}
-                        : {
-                              "vscode-languageserver-types$":
-                                  vscodeLanguageServerTypesEsmEntry,
-                              "vscode-languageserver-types/lib/umd/main.js$":
-                                  vscodeLanguageServerTypesEsmEntry,
-                          }),
+                    ...(vscodeCssLanguageServiceEsmEntry !== undefined && {
+                        "vscode-css-languageservice$":
+                            vscodeCssLanguageServiceEsmEntry,
+                    }),
+                    ...(vscodeLanguageServerTypesEsmEntry !== undefined && {
+                        "vscode-languageserver-types$":
+                            vscodeLanguageServerTypesEsmEntry,
+                        "vscode-languageserver-types/lib/umd/main.js$":
+                            vscodeLanguageServerTypesEsmEntry,
+                    }),
                 },
             },
         };
@@ -101,16 +97,14 @@ const suppressKnownWebpackWarningsPlugin: PluginModule = () => ({
 });
 
 const futureConfig = {
-    ...(enableExperimentalFaster
-        ? {
-              faster: {
-                  mdxCrossCompilerCache: true,
-                  rspackBundler: true,
-                  rspackPersistentCache: true,
-                  ssgWorkerThreads: true,
-              },
-          }
-        : {}),
+    ...(enableExperimentalFaster && {
+        faster: {
+            mdxCrossCompilerCache: true,
+            rspackBundler: true,
+            rspackPersistentCache: true,
+            ssgWorkerThreads: true,
+        },
+    }),
     v4: {
         [removeHeadAttributeFlagKey]: true,
         fasterByDefault: false,

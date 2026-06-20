@@ -66,10 +66,12 @@ const sortLexicographically = (
         let insertionOffset = sortedValues.length;
 
         for (const [index, sortedValue] of sortedValues.entries()) {
-            if (value.localeCompare(sortedValue) < 0) {
-                insertionOffset = index;
-                break;
+            if (value.localeCompare(sortedValue) >= 0) {
+                continue;
             }
+
+            insertionOffset = index;
+            break;
         }
 
         sortedValues.splice(insertionOffset, 0, value);

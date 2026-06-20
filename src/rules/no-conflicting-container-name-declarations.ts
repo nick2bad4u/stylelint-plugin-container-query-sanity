@@ -63,29 +63,31 @@ const rule =
         const summaryByName = collectContainerTypesByName(root);
 
         for (const [containerName, summary] of summaryByName) {
-            if (!setHas(ignoredNames, containerName)) {
-                const staticDeclarations = sortLexicographically([
-                    ...new Set(
-                        summary.declarations.filter(
-                            (declaration) => declaration.trim() !== ""
-                        )
-                    ),
-                ]);
+            if (setHas(ignoredNames, containerName)) {
+                continue;
+            }
 
-                if (
-                    staticDeclarations.length > 1 &&
-                    isDefined(summary.anchorNode)
-                ) {
-                    report({
-                        message: messages.conflictingDeclaration(
-                            containerName,
-                            arrayJoin(staticDeclarations, ", ")
-                        ),
-                        node: summary.anchorNode,
-                        result,
-                        ruleName,
-                    });
-                }
+            const staticDeclarations = sortLexicographically([
+                ...new Set(
+                    summary.declarations.filter(
+                        (declaration) => declaration.trim() !== ""
+                    )
+                ),
+            ]);
+
+            if (
+                staticDeclarations.length > 1 &&
+                isDefined(summary.anchorNode)
+            ) {
+                report({
+                    message: messages.conflictingDeclaration(
+                        containerName,
+                        arrayJoin(staticDeclarations, ", ")
+                    ),
+                    node: summary.anchorNode,
+                    result,
+                    ruleName,
+                });
             }
         }
     };
@@ -97,10 +99,12 @@ function sortLexicographically(values: readonly string[]): readonly string[] {
         let insertionIndex = sorted.length;
 
         for (const [index, sortedValue] of sorted.entries()) {
-            if (value.localeCompare(sortedValue) < 0) {
-                insertionIndex = index;
-                break;
+            if (value.localeCompare(sortedValue) >= 0) {
+                continue;
             }
+
+            insertionIndex = index;
+            break;
         }
 
         sorted.splice(insertionIndex, 0, value);

@@ -122,12 +122,14 @@ function normalizeAllowedUnits(
     const normalized: string[] = [];
 
     for (const item of value) {
-        if (typeof item === "string") {
-            const trimmed = item.trim();
+        if (typeof item !== "string") {
+            continue;
+        }
 
-            if (trimmed !== "") {
-                normalized.push(trimmed);
-            }
+        const trimmed = item.trim();
+
+        if (trimmed !== "") {
+            normalized.push(trimmed);
         }
     }
 

@@ -142,12 +142,14 @@ function normalizeIgnoreNames(values: unknown): readonly string[] {
     const normalized: string[] = [];
 
     for (const value of values) {
-        if (typeof value === "string") {
-            const trimmed = value.trim();
+        if (typeof value !== "string") {
+            continue;
+        }
 
-            if (trimmed !== "") {
-                normalized.push(trimmed);
-            }
+        const trimmed = value.trim();
+
+        if (trimmed !== "") {
+            normalized.push(trimmed);
         }
     }
 
